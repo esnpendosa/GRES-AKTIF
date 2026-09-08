@@ -102,7 +102,7 @@ class OpportunityMap extends Component
         $this->ideaSubmitted = true;
     }
 
-    public function selectAsset(int $id)
+    public function selectAsset(?int $id = null)
     {
         $this->selectedAssetId = $id;
         $this->ideaAssetId = $id;

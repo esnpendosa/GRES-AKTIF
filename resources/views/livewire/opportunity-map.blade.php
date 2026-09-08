@@ -53,6 +53,11 @@
 
             this.map.addLayer(this.markersLayer);
             this.renderMarkers();
+
+            // Deselect asset when clicking on empty map area
+            this.map.on('click', () => {
+                this.activeAsset = null;
+            });
             
             // If first asset exists, select it as default inspector
             if (this.assets && this.assets.length > 0) {
@@ -75,11 +80,17 @@
 
                 const marker = L.marker([asset.lat, asset.lng], { icon: customIcon });
 
-                marker.on('click', () => {
+                marker.on('click', (e) => {
+                    if (e && e.originalEvent) {
+                        e.originalEvent.stopPropagation();
+                    }
                     this.activeAsset = asset;
                     if (window.innerWidth < 768) {
                         this.map.panTo([asset.lat, asset.lng]);
                     }
+                    setTimeout(() => {
+                        if (window.lucide) window.lucide.createIcons();
+                    }, 40);
                 });
 
                 this.markersLayer.addLayer(marker);
@@ -260,13 +271,21 @@
     <div 
         x-show="activeAsset" 
         x-cloak 
-        class="w-full md:w-96 bg-white border-t md:border-t-0 md:border-l border-slate-200 p-5 overflow-y-auto z-20 shadow-xl flex flex-col justify-between"
+        :class="activeAsset ? 'flex' : '!hidden'"
+        class="w-full md:w-96 bg-white border-t md:border-t-0 md:border-l border-slate-200 p-5 overflow-y-auto z-20 shadow-xl flex-col justify-between shrink-0"
     >
         <div class="space-y-4" x-show="activeAsset">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 uppercase" x-text="activeAsset?.category"></span>
-                <button @click="activeAsset = null" class="text-slate-400 hover:text-slate-600">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 uppercase tracking-wide" x-text="activeAsset?.category"></span>
+                <button 
+                    type="button" 
+                    @click.stop="activeAsset = null; $wire.selectAsset(null)" 
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+                    title="Tutup Panel"
+                >
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             </div>
 
@@ -279,7 +298,10 @@
             <div class="space-y-1">
                 <h3 class="font-heading font-bold text-base text-slate-900 leading-snug" x-text="activeAsset?.name"></h3>
                 <p class="text-xs text-slate-500 flex items-center gap-1.5">
-                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-teal-700"></i>
+                    <svg class="w-3.5 h-3.5 text-teal-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
                     <span>Desa <span x-text="activeAsset?.village"></span>, Kec. <span x-text="activeAsset?.district"></span></span>
                 </p>
             </div>
@@ -308,18 +330,22 @@
                 <button 
                     type="button"
                     wire:click="openIdeaModal(activeAsset ? activeAsset.id : null)" 
-                    class="w-full py-2.5 px-4 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors"
+                    class="w-full py-2.5 px-4 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
                 >
-                    <i data-lucide="lightbulb" class="w-4 h-4 text-amber-300"></i>
+                    <svg class="w-4 h-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
                     <span>+ Usulkan Ide Pemanfaatan</span>
                 </button>
 
                 <a 
                     :href="activeAsset?.url" 
-                    class="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-semibold text-xs flex items-center justify-center gap-2 transition-colors"
+                    class="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
                     <span>Lihat Detail & Voting Ide Warga</span>
-                    <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-500"></i>
+                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
                 </a>
             </div>
         </div>
