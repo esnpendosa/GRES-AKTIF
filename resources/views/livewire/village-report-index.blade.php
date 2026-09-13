@@ -19,7 +19,11 @@
                     </p>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ route('reports.kib_a') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition-colors border border-white/20 backdrop-blur-xs">
+                        <i data-lucide="file-text" class="w-4 h-4 text-amber-300"></i>
+                        <span>Buku Inventaris (KIB A)</span>
+                    </a>
                     <a href="{{ route('map') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs transition-colors shadow-sm">
                         <i data-lucide="map" class="w-4 h-4"></i>
                         <span>Buka Peta Spasial GIS</span>
@@ -142,6 +146,14 @@
                             Rincian Data
                         </button>
                         <a 
+                            href="{{ route('reports.kib_a', $village->id) }}" 
+                            class="py-1.5 px-2.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-semibold transition-colors flex items-center gap-1"
+                            title="Cetak Format SIPADES (KIB A)"
+                        >
+                            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                            <span>KIB A</span>
+                        </a>
+                        <a 
                             href="{{ route('map') }}?village={{ $village->id }}" 
                             class="p-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-700 transition-colors"
                             title="Buka di Peta"
@@ -232,13 +244,20 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-end gap-2">
                         <button 
                             wire:click="closeDetail" 
                             class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold"
                         >
                             Tutup
                         </button>
+                        <a 
+                            href="{{ route('reports.kib_a', $selectedVillageDetail['village']->id) }}" 
+                            class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold flex items-center gap-1.5"
+                        >
+                            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                            <span>Cetak Format SIPADES (KIB A)</span>
+                        </a>
                         <a 
                             href="{{ route('map') }}?village={{ $selectedVillageDetail['village']->id }}" 
                             class="px-4 py-2 rounded-lg bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold flex items-center gap-1.5"

@@ -251,14 +251,24 @@
                         <p class="text-[11px] text-slate-500 mt-0.5">Otoritas penuh Pemerintah Desa untuk mengelola, mengubah, dan menambah aset desa.</p>
                     </div>
 
-                    <button 
-                        type="button" 
-                        wire:click="openCreateAssetModal" 
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-xs transition-colors shrink-0"
-                    >
-                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                        <span>+ Tambah Aset Desa</span>
-                    </button>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a 
+                            href="{{ route('reports.kib_a', $village->id ?? 1) }}" 
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs border border-amber-200 shadow-xs transition-colors"
+                        >
+                            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                            <span>Buku Inventaris (KIB A)</span>
+                        </a>
+
+                        <button 
+                            type="button" 
+                            wire:click="openCreateAssetModal" 
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-xs transition-colors"
+                        >
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                            <span>+ Tambah Aset Desa</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Table Container -->
