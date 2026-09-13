@@ -33,8 +33,9 @@
                         <div>
                             <div class="flex items-center gap-2">
                                 <h3 class="font-heading font-extrabold text-sm text-white">KENTONGAN AI</h3>
-                                <span class="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] font-bold border border-teal-500/40">
-                                    DeepSeek &bull; OpenRouter
+                                <span class="flex items-center gap-1 text-[10px] text-teal-400 font-medium">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></span>
+                                    <span>Konsultasi Aset Daerah</span>
                                 </span>
                             </div>
                         </div>
@@ -144,9 +145,10 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
-                                <div class="space-y-3 flex-1">
-                                    <div class="bg-white rounded-3xl rounded-tl-none p-4 sm:p-5 border border-slate-200 shadow-xs text-xs sm:text-[13px] text-slate-800 leading-relaxed space-y-2.5">
-                                        {!! nl2br(preg_replace('/\*\*(.*?)\*\*/', '<strong class="text-slate-900 font-bold">$1</strong>', e($msg['text']))) !!}
+                                    <div class="bg-white rounded-3xl rounded-tl-none p-4 sm:p-5 border border-slate-200 shadow-xs text-xs sm:text-[13px] text-slate-800 leading-relaxed space-y-2">
+                                        <div class="prose prose-sm prose-slate max-w-none text-slate-800 leading-relaxed font-sans prose-headings:font-bold prose-headings:text-slate-900 prose-headings:text-sm prose-headings:mt-3 prose-headings:mb-1.5 prose-p:my-1.5 prose-ul:my-1.5 prose-ul:pl-4 prose-ol:my-1.5 prose-ol:pl-4 prose-li:my-0.5 prose-hr:my-3 prose-hr:border-slate-200 prose-strong:text-slate-900 prose-strong:font-bold">
+                                            {!! \Illuminate\Support\Str::markdown($msg['text']) !!}
+                                        </div>
                                     </div>
 
                                     <!-- Actionable Citizen Proposal Card -->
