@@ -4,114 +4,199 @@
         <button 
             type="button" 
             wire:click="$toggle('isModalOpen')" 
-            class="group inline-flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-teal-800 via-teal-700 to-slate-900 text-white font-bold text-xs shadow-2xl border border-teal-500/30 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            class="group inline-flex items-center gap-2.5 px-4 py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-2xl border border-teal-500/40 hover:border-teal-400 hover:scale-105 active:scale-95 transition-all cursor-pointer"
             title="Buka Asisten AI Kentongan"
         >
-            <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-                <svg class="w-4 h-4 text-amber-300 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            <div class="w-7 h-7 rounded-full bg-teal-500/20 text-teal-300 flex items-center justify-center">
+                <svg class="w-4 h-4 text-teal-300 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
             </div>
-            <span>Konsultasi AI Ide (+10 Pts)</span>
-            <span class="w-2 h-2 rounded-full bg-teal-300 animate-ping"></span>
+            <span class="tracking-wide">Tanya AI (+10 Pts)</span>
+            <span class="w-2 h-2 rounded-full bg-teal-400 animate-ping"></span>
         </button>
     </div>
 
-    <!-- AI Chatbot Modal / Drawer -->
+    <!-- ChatGPT Style Modal / Window -->
     @if($isModalOpen)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-            <div class="bg-white rounded-3xl max-w-2xl w-full h-[85vh] max-h-[680px] border border-slate-200 shadow-2xl flex flex-col overflow-hidden animate-scale-in">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+            <div class="bg-white rounded-3xl w-full border border-slate-200 shadow-2xl flex flex-col overflow-hidden transition-all duration-300 {{ $isMaximized ? 'h-[96vh] max-w-[96vw]' : 'h-[88vh] max-h-[720px] max-w-3xl' }}">
                 
-                <!-- Chatbot Header -->
-                <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-teal-950 p-4 text-white flex items-center justify-between gap-3 shrink-0">
+                <!-- ChatGPT Top Navigation Bar -->
+                <div class="bg-slate-900 px-4 py-3 text-white flex items-center justify-between gap-3 shrink-0 border-b border-slate-800">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-teal-600/30 border border-teal-500/40 text-teal-300 flex items-center justify-center shadow-xs shrink-0">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="7" y="5" width="12" height="22" rx="3.5" stroke="#00c9a7" stroke-width="2.2" fill="#0f172a"/>
-                                <rect x="12" y="9" width="2" height="14" rx="1" fill="#38bdf8"/>
-                                <path d="M22 10C23.8 12.2 23.8 17.8 22 20" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
-                                <path d="M25 7C28 10.5 28 19.5 25 23" stroke="#00c9a7" stroke-width="2" stroke-linecap="round"/>
+                        <div class="w-8 h-8 rounded-xl bg-teal-600/30 border border-teal-500/50 text-teal-300 flex items-center justify-center shadow-xs shrink-0">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
-                                <h3 class="font-heading font-extrabold text-sm sm:text-base text-white">Asisten AI KENTONGAN</h3>
-                                <span class="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[9px] font-bold border border-teal-500/30">AI Ide & Saran</span>
+                                <h3 class="font-heading font-extrabold text-sm text-white">KENTONGAN AI</h3>
+                                <span class="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] font-bold border border-teal-500/40">
+                                    DeepSeek &bull; OpenRouter
+                                </span>
                             </div>
-                            <p class="text-[11px] text-slate-300">Konsultasi cerdas ide pemanfaatan aset desa bernilai ekonomi</p>
                         </div>
                     </div>
 
-                    <button 
-                        type="button" 
-                        wire:click="$set('isModalOpen', false)" 
-                        class="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
-                        title="Tutup Chatbot"
-                    >
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    <!-- Actions: New Chat, Maximize, Close -->
+                    <div class="flex items-center gap-1.5">
+                        <button 
+                            type="button" 
+                            wire:click="resetChat" 
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition-colors cursor-pointer"
+                            title="Mulai Percakapan Baru"
+                        >
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span class="hidden sm:inline">Chat Baru</span>
+                        </button>
+
+                        <button 
+                            type="button" 
+                            wire:click="toggleMaximize" 
+                            class="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                            title="{{ $isMaximized ? 'Perkecil' : 'Perbesar Layar Penuh' }}"
+                        >
+                            @if($isMaximized)
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 9L4 4m0 0l5 0m-5 0l0 5m6 6l5 5m0 0l-5 0m5 0l0-5" />
+                                </svg>
+                            @else
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                </svg>
+                            @endif
+                        </button>
+
+                        <button 
+                            type="button" 
+                            wire:click="$set('isModalOpen', false)" 
+                            class="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-rose-500/20 hover:text-rose-400 transition-colors cursor-pointer"
+                            title="Tutup"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Asset Context Bar -->
-                <div class="bg-slate-50 border-b border-slate-200 px-4 py-2.5 flex items-center justify-between gap-3 text-xs shrink-0">
-                    <span class="text-slate-600 font-semibold shrink-0">Fokus Aset Diskusi:</span>
-                    <select wire:model.live="selectedAssetId" class="flex-1 max-w-sm px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs focus:ring-2 focus:ring-teal-500">
+                <!-- Asset Focus Header Selector -->
+                <div class="bg-slate-50 border-b border-slate-200 px-4 py-2 flex items-center justify-between gap-3 text-xs shrink-0">
+                    <div class="flex items-center gap-2 text-slate-700 font-medium shrink-0">
+                        <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                        <span class="text-slate-500">Aset Sasaran:</span>
+                    </div>
+                    <select wire:model.live="selectedAssetId" class="flex-1 max-w-md px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs font-semibold focus:ring-2 focus:ring-teal-500">
                         @foreach($assets as $a)
                             <option value="{{ $a->id }}">{{ $a->name }} (Desa {{ $a->village->name ?? '-' }})</option>
                         @endforeach
                     </select>
                 </div>
 
-                <!-- Chat Message Feed -->
-                <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-slate-100/60" id="chatFeedContainer" x-data x-init="$el.scrollTop = $el.scrollHeight" x-effect="$el.scrollTop = $el.scrollHeight">
+                <!-- Chat Feed -->
+                <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-slate-50/50" id="chatFeedContainer" x-data x-init="$el.scrollTop = $el.scrollHeight" x-effect="$el.scrollTop = $el.scrollHeight">
+                    
+                    @if(count($messages) <= 1)
+                        <!-- ChatGPT Welcome Hero & Prompt Starters -->
+                        <div class="max-w-xl mx-auto text-center space-y-6 pt-4 pb-2 animate-fade-in">
+                            <div class="w-12 h-12 rounded-2xl bg-slate-900 text-teal-400 flex items-center justify-center mx-auto shadow-md border border-teal-500/30">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-extrabold text-lg text-slate-900">Perencanaan Aset Desa Cerdas</h3>
+                                <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">Konsultasikan kelayakan bisnis, proyeksi pendapatan BUMDes, atau bentuk kemitraan usaha untuk aset desa di Gresik.</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                                <button type="button" wire:click="sendQuickPrompt('Bagaimana rencana kelayakan pemanfaatan aset ini menjadi Sentra Kuliner UMKM & Pujasera BUMDes?')" class="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-teal-500 hover:shadow-md transition-all group cursor-pointer">
+                                    <span class="text-xs font-bold text-slate-800 group-hover:text-teal-700 block">Sentra Kuliner & Pujasera</span>
+                                    <span class="text-[11px] text-slate-500 mt-1 block">Konsep 10-15 kios terstandar bagi pelaku usaha mikro.</span>
+                                </button>
+                                <button type="button" wire:click="sendQuickPrompt('Kaji potensi pertanian hidroponik presisi, greenhouse melon, atau perikanan air payau di aset ini.')" class="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-teal-500 hover:shadow-md transition-all group cursor-pointer">
+                                    <span class="text-xs font-bold text-slate-800 group-hover:text-teal-700 block">Pertanian & Green House</span>
+                                    <span class="text-[11px] text-slate-500 mt-1 block">Pemberdayaan petani milenial & kemitraan pasar.</span>
+                                </button>
+                                <button type="button" wire:click="sendQuickPrompt('Susun konsep Balai Vokasi & Pelatihan Keterampilan Kerja Industri Manyar.')" class="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-teal-500 hover:shadow-md transition-all group cursor-pointer">
+                                    <span class="text-xs font-bold text-slate-800 group-hover:text-teal-700 block">Balai Vokasi & Digital Hub</span>
+                                    <span class="text-[11px] text-slate-500 mt-1 block">Kemitraan CSR kawasan industri & sertifikasi K3.</span>
+                                </button>
+                                <button type="button" wire:click="sendQuickPrompt('Bagaimana strategi pengembangan ekowisata ramah lingkungan dan ruang publik warga?')" class="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-teal-500 hover:shadow-md transition-all group cursor-pointer">
+                                    <span class="text-xs font-bold text-slate-800 group-hover:text-teal-700 block">Ekowisata & Ruang Terbuka</span>
+                                    <span class="text-[11px] text-slate-500 mt-1 block">Taman tematik terintegrasi pasar kaget akhir pekan.</span>
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Message History -->
                     @foreach($messages as $msg)
                         @if($msg['role'] === 'assistant')
-                            <!-- Assistant Bubble -->
-                            <div class="flex items-start gap-3 max-w-[90%] sm:max-w-[85%]">
-                                <div class="w-8 h-8 rounded-xl bg-slate-900 text-teal-300 flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+                            <!-- ChatGPT Assistant Message -->
+                            <div class="flex items-start gap-3.5 max-w-[92%] sm:max-w-[88%]" x-data="{ copied: false }">
+                                <div class="w-8 h-8 rounded-xl bg-slate-900 text-teal-400 flex items-center justify-center shrink-0 shadow-xs mt-1 border border-teal-500/30">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
-                                <div class="space-y-2.5">
-                                    <div class="bg-white rounded-2xl rounded-tl-none p-4 border border-slate-200 shadow-sm text-xs text-slate-700 leading-relaxed space-y-2">
-                                        {!! nl2br(e($msg['text'])) !!}
+                                <div class="space-y-3 flex-1">
+                                    <div class="bg-white rounded-3xl rounded-tl-none p-4 sm:p-5 border border-slate-200 shadow-xs text-xs sm:text-[13px] text-slate-800 leading-relaxed space-y-2.5">
+                                        {!! nl2br(preg_replace('/\*\*(.*?)\*\*/', '<strong class="text-slate-900 font-bold">$1</strong>', e($msg['text']))) !!}
                                     </div>
 
-                                    <!-- If AI generated a concrete idea proposal, offer 1-click submit card -->
+                                    <!-- Actionable Citizen Proposal Card -->
                                     @if(!empty($msg['proposal']))
-                                        <div class="bg-teal-50/80 rounded-2xl p-3.5 border border-teal-200 shadow-xs space-y-2">
+                                        <div class="bg-teal-50/90 rounded-2xl p-4 border border-teal-200 shadow-xs space-y-2.5">
                                             <div class="flex items-center justify-between gap-2">
-                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-700 text-white uppercase tracking-wider">
+                                                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-md bg-teal-700 text-white uppercase tracking-wider">
                                                     Rekomendasi {{ $msg['proposal']['category'] }}
                                                 </span>
-                                                <span class="text-[10px] text-teal-800 font-bold">+10 Poin Warga</span>
+                                                <span class="text-[11px] text-teal-800 font-bold">+10 Poin Warga</span>
                                             </div>
                                             <div>
-                                                <h4 class="font-heading font-bold text-xs text-slate-900">{{ $msg['proposal']['title'] }}</h4>
-                                                <p class="text-[11px] text-slate-600 mt-0.5">{{ $msg['proposal']['description'] }}</p>
+                                                <h4 class="font-heading font-bold text-xs sm:text-sm text-slate-900">{{ $msg['proposal']['title'] }}</h4>
+                                                <p class="text-xs text-slate-600 mt-1 leading-normal">{{ $msg['proposal']['description'] }}</p>
                                             </div>
                                             <button 
                                                 type="button" 
                                                 wire:click="submitProposal('{{ addslashes($msg['proposal']['title']) }}', '{{ addslashes($msg['proposal']['category']) }}', '{{ addslashes($msg['proposal']['description']) }}', {{ $msg['proposal']['asset_id'] ?? 'null' }})"
-                                                class="w-full py-2 px-3 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all active:scale-95 cursor-pointer"
+                                                class="w-full py-2.5 px-4 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
                                             >
-                                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
                                                 <span>Jadikan Usulan Resmi Warga</span>
                                             </button>
                                         </div>
                                     @endif
 
-                                    <span class="text-[10px] text-slate-400 block">{{ $msg['time'] ?? '' }}</span>
+                                    <!-- Bottom Assistant Bar (Copy & Timestamp) -->
+                                    <div class="flex items-center gap-3 text-[11px] text-slate-400 pl-1">
+                                        <span>{{ $msg['time'] ?? '' }}</span>
+                                        <button 
+                                            type="button" 
+                                            @click="navigator.clipboard.writeText('{{ addslashes($msg['text']) }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                            class="hover:text-slate-600 flex items-center gap-1 transition-colors cursor-pointer"
+                                            title="Salin Respons"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                            </svg>
+                                            <span x-text="copied ? 'Tersalin!' : 'Salin'">Salin</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         @else
-                            <!-- User Bubble -->
+                            <!-- User Message -->
                             <div class="flex items-start justify-end gap-2.5 ml-auto max-w-[85%]">
                                 <div class="space-y-1 text-right">
-                                    <div class="bg-teal-700 text-white rounded-2xl rounded-tr-none p-3.5 shadow-sm text-xs leading-relaxed text-left">
+                                    <div class="bg-slate-900 text-white rounded-3xl rounded-tr-none px-4 py-3 shadow-xs text-xs sm:text-[13px] leading-relaxed text-left">
                                         {{ $msg['text'] }}
                                     </div>
                                     <span class="text-[10px] text-slate-400 block mr-1">{{ $msg['time'] ?? '' }}</span>
@@ -119,45 +204,50 @@
                             </div>
                         @endif
                     @endforeach
+
+                    <!-- Loading / Thinking Indicator -->
+                    <div wire:loading wire:target="sendMessage,sendQuickPrompt" class="flex items-center gap-3 max-w-[80%] animate-fade-in">
+                        <div class="w-8 h-8 rounded-xl bg-slate-900 text-teal-400 flex items-center justify-center shrink-0 border border-teal-500/30">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </div>
+                        <div class="bg-white rounded-2xl rounded-tl-none px-4 py-3 border border-slate-200 shadow-xs flex items-center gap-2">
+                            <span class="text-xs text-slate-500 font-medium">Asisten AI sedang merumuskan analisis...</span>
+                            <span class="flex gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-bounce"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-bounce [animation-delay:0.2s]"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-bounce [animation-delay:0.4s]"></span>
+                            </span>
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- Quick Prompt Chips -->
-                <div class="px-4 py-2 bg-white border-t border-slate-100 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-[11px] shrink-0">
-                    <span class="text-slate-400 font-bold shrink-0">Contoh:</span>
-                    <button type="button" wire:click="sendQuickPrompt('Rekomendasi konsep Sentra Kuliner & Pujasera UMKM')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-700 font-medium shrink-0 transition-colors">
-                        Pusat Kuliner
-                    </button>
-                    <button type="button" wire:click="sendQuickPrompt('Ide Greenhouse Pertanian Modern & Tambak')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-700 font-medium shrink-0 transition-colors">
-                        Pertanian Modern
-                    </button>
-                    <button type="button" wire:click="sendQuickPrompt('Konsep Balai Pelatihan Vokasi & Digital Hub')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-700 font-medium shrink-0 transition-colors">
-                        Balai Vokasi
-                    </button>
-                    <button type="button" wire:click="sendQuickPrompt('Konsep Ekowisata Budaya & Taman Terbuka')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-700 font-medium shrink-0 transition-colors">
-                        Ekowisata
-                    </button>
+                <!-- ChatGPT Style Bottom Input Bar -->
+                <div class="bg-white border-t border-slate-200 p-3 sm:p-4 shrink-0 space-y-2">
+                    <form wire:submit="sendMessage" class="relative flex items-center">
+                        <input 
+                            type="text" 
+                            wire:model="userInput" 
+                            placeholder="Kirim pesan ke KENTONGAN AI..." 
+                            class="w-full pl-4 pr-12 py-3 rounded-2xl border border-slate-300 bg-slate-50 text-slate-900 text-xs sm:text-sm focus:ring-2 focus:ring-slate-900 focus:bg-white focus:outline-none transition-all placeholder:text-slate-400"
+                        />
+                        <button 
+                            type="submit" 
+                            class="absolute right-2 p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition-all shadow-xs cursor-pointer active:scale-95 disabled:opacity-50"
+                            title="Kirim"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                            </svg>
+                        </button>
+                    </form>
+                    <p class="text-[10px] text-center text-slate-400">KENTONGAN AI dapat memberikan rekomendasi strategis. Periksa kembali kebijakan &amp; kelayakan lapangan sebelum realisasi.</p>
                 </div>
-
-                <!-- Message Input Form -->
-                <form wire:submit="sendMessage" class="p-3 sm:p-4 bg-white border-t border-slate-200 flex items-center gap-2 shrink-0">
-                    <input 
-                        type="text" 
-                        wire:model="userInput" 
-                        placeholder="Ketik ide, pertanyaan, atau konsultasikan potensi aset desa..." 
-                        class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-xs focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all"
-                    />
-                    <button 
-                        type="submit" 
-                        class="p-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold transition-all shadow-xs shrink-0 cursor-pointer"
-                        title="Kirim Pesan"
-                    >
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                    </button>
-                </form>
 
             </div>
         </div>
     @endif
 </div>
+

@@ -19,6 +19,7 @@ class AiSuggestionChatbot extends Component
     public ?int $selectedAssetId = null;
     public bool $isThinking = false;
     public bool $isModalOpen = false;
+    public bool $isMaximized = false;
 
     protected $listeners = [
         'open-ai-chatbot' => 'openChatbot',
@@ -28,15 +29,31 @@ class AiSuggestionChatbot extends Component
     public function mount(?int $assetId = null)
     {
         $this->selectedAssetId = $assetId ?? Asset::first()?->id;
+        $this->initWelcomeMessage();
+    }
 
+    public function initWelcomeMessage()
+    {
         $this->messages = [
             [
                 'role' => 'assistant',
-                'text' => "Selamat datang di Konsultasi Perencanaan Aset Daerah. Saya Asisten AI KENTONGAN yang terintegrasi dengan data spasial dan kelayakan ekonomi Bappedalitbang Kabupaten Gresik. Silakan pilih aset yang ingin dikaji atau sampaikan gagasan pemanfaatan ekonomi baru.",
+                'text' => "Halo! Saya **Asisten AI KENTONGAN**, siap membantu Anda merencanakan pemanfaatan aset desa non-aktif, optimalisasi BUMDes, analisis kelayakan usaha, dan studi potensi ekonomi wilayah Kabupaten Gresik.\n\nSilakan pilih aset fokus di atas atau tanyakan ide pengembangan apapun untuk kemajuan desa Anda.",
                 'time' => now()->format('H:i'),
                 'proposal' => null,
             ]
         ];
+    }
+
+    public function resetChat()
+    {
+        $this->userInput = '';
+        $this->isThinking = false;
+        $this->initWelcomeMessage();
+    }
+
+    public function toggleMaximize()
+    {
+        $this->isMaximized = !$this->isMaximized;
     }
 
     public function openChatbot(?int $assetId = null)

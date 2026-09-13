@@ -15,12 +15,12 @@ class OpenRouterAiService
     public function __construct()
     {
         $this->apiKey = config('services.openrouter.api_key') ?? env('OPENROUTER_API_KEY', '');
-        $this->model = config('services.openrouter.model') ?? env('OPENROUTER_MODEL', 'google/gemini-2.0-flash-exp:free');
+        $this->model = config('services.openrouter.model') ?? env('OPENROUTER_MODEL', 'deepseek/deepseek-chat');
         $this->baseUrl = config('services.openrouter.base_url') ?? 'https://openrouter.ai/api/v1';
     }
 
     /**
-     * Send Realtime Chat Completion to OpenRouter
+     * Send Realtime Chat Completion to OpenRouter with automatic multi-model fallback
      */
     public function chat(array $messages, ?Asset $asset = null): array
     {
@@ -31,64 +31,73 @@ class OpenRouterAiService
         $assetCond = $asset ? $asset->condition : 'kurang produktif';
 
         $systemPrompt = <<<SYS
-Anda adalah "Asisten AI KENTONGAN", pakar perencanaan ekonomi desa, tata kelola aset daerah, dan pemberdayaan BUMDes Pemerintah Kabupaten Gresik.
+Anda adalah "Asisten AI KENTONGAN", pakar tata kelola aset daerah, perencanaan spasial, dan pemberdayaan ekonomi desa Kabupaten Gresik.
 Tugas Anda:
-1. Memberikan rekomendasi pemanfaatan aset non-aktif atau lahan tidur desa yang konkret, realistis, dan bernilai ekonomi tinggi.
-2. Jangan menggunakan emotikon/stiker berlebihan, gunakan gaya bahasa formal institusional yang santun, profesional, dan berbobot.
-3. Struktur jawaban Anda dengan poin-poin jelas:
-   - Analisis Potensi & Nilai Tambah Ekonomi
-   - Rekomendasi Bentuk Usaha (BUMDes / UMKM / Wisata / Pertanian / Vokasi)
-   - Estimasi Skema Pendapatan & Manfaat untuk Masyarakat Desa
-4. Format respon Anda dalam bahasa Indonesia yang elegan dan terstruktur.
+1. Memberikan rekomendasi pemanfaatan aset non-aktif atau lahan tidur desa yang aplikatif, bernilai ekonomi tinggi, dan memberdayakan warga/BUMDes.
+2. Gaya bahasa profesional, ramah, dan terstruktur jelas (gunakan poin-poin tebal, list, dan langkah konkret tanpa stiker emoji).
+3. Format rekomendasi dengan poin:
+   - Analisis Peluang Strategis & Kesesuaian Lokasi
+   - Rekomendasi Unit Usaha Prioritas (BUMDes / Koperasi / Kemitraan)
+   - Proyeksi Ekonomi & Pendapatan Asli Desa (PADes)
+   - Langkah Aksi Implementasi Warga & Pemdes
 
-Konteks Aset Terpilih:
+Konteks Wilayah & Aset Terpilih:
 - Nama Aset: {$assetName}
 - Lokasi: Desa {$villageName}, Kecamatan {$districtName}, Kabupaten Gresik
 - Luas: {$assetArea} m²
 - Kondisi: {$assetCond}
 SYS;
 
-        // If OpenRouter API key is available, call OpenRouter API
+        // Candidate models in priority order
+        $candidateModels = array_unique([
+            $this->model,
+            'deepseek/deepseek-chat',
+            'openai/gpt-4o-mini',
+            'meta-llama/llama-3.3-70b-instruct',
+        ]);
+
         if (!empty($this->apiKey)) {
-            try {
-                $payloadMessages = [
-                    ['role' => 'system', 'content' => $systemPrompt]
+            $payloadMessages = [
+                ['role' => 'system', 'content' => $systemPrompt]
+            ];
+
+            foreach ($messages as $msg) {
+                $payloadMessages[] = [
+                    'role' => $msg['role'] === 'user' ? 'user' : 'assistant',
+                    'content' => $msg['text'] ?? $msg['content'] ?? ''
                 ];
+            }
 
-                foreach ($messages as $msg) {
-                    $payloadMessages[] = [
-                        'role' => $msg['role'] === 'user' ? 'user' : 'assistant',
-                        'content' => $msg['text'] ?? $msg['content'] ?? ''
-                    ];
-                }
+            foreach ($candidateModels as $candidate) {
+                try {
+                    $response = Http::withHeaders([
+                        'Authorization' => 'Bearer ' . $this->apiKey,
+                        'HTTP-Referer' => config('app.url', 'http://localhost:8000'),
+                        'X-Title' => 'KENTONGAN AI Kabupaten Gresik',
+                        'Content-Type' => 'application/json',
+                    ])->timeout(20)->post($this->baseUrl . '/chat/completions', [
+                        'model' => $candidate,
+                        'messages' => $payloadMessages,
+                        'temperature' => 0.7,
+                        'max_tokens' => 800,
+                    ]);
 
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'HTTP-Referer' => config('app.url', 'http://localhost:8000'),
-                    'X-Title' => 'KENTONGAN AI Kabupaten Gresik',
-                    'Content-Type' => 'application/json',
-                ])->timeout(20)->post($this->baseUrl . '/chat/completions', [
-                    'model' => $this->model,
-                    'messages' => $payloadMessages,
-                    'temperature' => 0.7,
-                    'max_tokens' => 1000,
-                ]);
-
-                if ($response->successful()) {
-                    $data = $response->json();
-                    $reply = $data['choices'][0]['message']['content'] ?? null;
-                    if ($reply) {
-                        return [
-                            'success' => true,
-                            'reply' => $reply,
-                            'model' => $data['model'] ?? $this->model,
-                        ];
+                    if ($response->successful()) {
+                        $data = $response->json();
+                        $reply = $data['choices'][0]['message']['content'] ?? null;
+                        if (!empty($reply)) {
+                            return [
+                                'success' => true,
+                                'reply' => $reply,
+                                'model' => $data['model'] ?? $candidate,
+                            ];
+                        }
+                    } else {
+                        Log::warning("OpenRouter model {$candidate} error: " . $response->body());
                     }
-                } else {
-                    Log::warning('OpenRouter API call failed: ' . $response->body());
+                } catch (\Throwable $e) {
+                    Log::error("OpenRouter exception for {$candidate}: " . $e->getMessage());
                 }
-            } catch (\Throwable $e) {
-                Log::error('OpenRouter Exception: ' . $e->getMessage());
             }
         }
 
