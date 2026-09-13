@@ -3,8 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Asset;
+use App\Models\AssetIdea;
 use App\Models\AssetReport;
-use App\Models\CitizenSuggestion;
 use App\Models\District;
 use App\Models\Village;
 use Livewire\Attributes\Layout;
@@ -46,14 +46,14 @@ class VillageReportIndex extends Component
             ->find($villageId);
 
         if ($village) {
-            $suggestionsCount = CitizenSuggestion::whereHas('asset', function ($q) use ($villageId) {
+            $suggestionsCount = AssetIdea::whereHas('asset', function ($q) use ($villageId) {
                 $q->where('village_id', $villageId);
             })->count();
 
             $this->selectedVillageDetail = [
                 'village' => $village,
                 'suggestions_count' => $suggestionsCount,
-                'total_valuation' => $village->assets->sum('estimated_value') ?? 0,
+                'total_valuation' => $village->assets->sum('estimated_economic_value') ?: ($village->assets->sum('area') * 250000),
                 'non_active_assets' => $village->assets->whereIn('condition', ['rusak', 'terbengkalai', 'tidak_digunakan', 'kurang_produktif'])->count(),
                 'active_assets' => $village->assets->where('condition', 'baik')->count(),
             ];
@@ -80,7 +80,7 @@ class VillageReportIndex extends Component
                 },
                 'reports',
             ])
-            ->withSum('assets as total_asset_value', 'estimated_value');
+            ->withSum('assets as total_asset_value', 'estimated_economic_value');
 
         if (!empty($this->search)) {
             $query->where('name', 'like', '%' . $this->search . '%');
@@ -106,8 +106,8 @@ class VillageReportIndex extends Component
         $totalVillages = Village::count();
         $totalAssets = Asset::count();
         $totalReports = AssetReport::count();
-        $totalSuggestions = CitizenSuggestion::count();
-        $totalValuation = Asset::sum('estimated_value');
+        $totalSuggestions = AssetIdea::count();
+        $totalValuation = Asset::sum('estimated_economic_value') ?: (Asset::sum('area') * 250000);
 
         return view('livewire.village-report-index', compact(
             'villages',

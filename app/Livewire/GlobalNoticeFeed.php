@@ -3,8 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Asset;
+use App\Models\AssetIdea;
 use App\Models\AssetReport;
-use App\Models\CitizenSuggestion;
 use Livewire\Component;
 
 class GlobalNoticeFeed extends Component
@@ -33,8 +33,8 @@ class GlobalNoticeFeed extends Component
                     'type' => 'asset',
                     'icon' => 'building-2',
                     'title' => 'Pembaruan Data Aset',
-                    'message' => "Aset '{$asset->name}' di Desa {$asset->village->name} telah diperbarui statusnya.",
-                    'time' => $asset->updated_at->diffForHumans(),
+                    'message' => "Aset '{$asset->name}' di Desa " . ($asset->village->name ?? 'Gresik') . " telah diperbarui statusnya.",
+                    'time' => $asset->updated_at ? $asset->updated_at->diffForHumans() : 'baru saja',
                     'link' => route('assets.show', $asset->slug ?? $asset->id),
                 ];
             });
@@ -49,12 +49,12 @@ class GlobalNoticeFeed extends Component
                     'icon' => 'flag',
                     'title' => 'Laporan Netizen Masuk',
                     'message' => "Laporan baru warga di Desa " . ($report->village->name ?? 'Gresik') . " ({$report->title})",
-                    'time' => $report->created_at->diffForHumans(),
+                    'time' => $report->created_at ? $report->created_at->diffForHumans() : 'baru saja',
                     'link' => route('map') . '?report=' . $report->id,
                 ];
             });
 
-        $latestSuggestions = CitizenSuggestion::with('asset')
+        $latestSuggestions = AssetIdea::with('asset')
             ->latest('created_at')
             ->take(2)
             ->get()
@@ -63,9 +63,9 @@ class GlobalNoticeFeed extends Component
                     'type' => 'suggestion',
                     'icon' => 'sparkles',
                     'title' => 'Aspirasi AI Inklusif',
-                    'message' => "Netizen mengusulkan ide baru untuk: " . ($sug->asset->name ?? 'Aset Daerah'),
-                    'time' => $sug->created_at->diffForHumans(),
-                    'link' => route('assets.show', $sug->asset->slug ?? $sug->asset_id),
+                    'message' => "Netizen mengusulkan ide: " . ($sug->title ?? 'Ide Optimalisasi Aset'),
+                    'time' => $sug->created_at ? $sug->created_at->diffForHumans() : 'baru saja',
+                    'link' => $sug->asset ? route('assets.show', $sug->asset->slug ?? $sug->asset_id) : route('explore'),
                 ];
             });
 
