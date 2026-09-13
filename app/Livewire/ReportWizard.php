@@ -165,6 +165,13 @@ class ReportWizard extends Component
 
         $this->createdReport = $report;
         $this->isSubmitted = true;
+
+        $this->dispatch('report-submitted-success', [
+            'id' => $report->id,
+            'lat' => $report->latitude,
+            'lng' => $report->longitude,
+            'title' => $report->title,
+        ]);
     }
 
     public function render()

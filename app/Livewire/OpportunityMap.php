@@ -32,6 +32,10 @@ class OpportunityMap extends Component
     public string $ideaDescription = '';
     public bool $ideaSubmitted = false;
 
+    public bool $showNewReportToast = false;
+    public ?float $focusLat = null;
+    public ?float $focusLng = null;
+
     public function mount()
     {
         $first = Asset::first();
@@ -42,6 +46,14 @@ class OpportunityMap extends Component
 
         if (request()->query('openIdea')) {
             $this->showGlobalIdeaModal = true;
+        }
+
+        if (request()->query('newReport')) {
+            $this->showNewReportToast = true;
+            if (request()->query('lat') && request()->query('lng')) {
+                $this->focusLat = (float)request()->query('lat');
+                $this->focusLng = (float)request()->query('lng');
+            }
         }
     }
 

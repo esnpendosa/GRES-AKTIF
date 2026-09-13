@@ -77,7 +77,7 @@ class UserSeeder extends Seeder
         $superAdmin = User::updateOrCreate(
             ['email' => 'admin@gresaktif.id'],
             [
-                'name' => 'Administrator GRES-AKTIF',
+                'name' => 'Administrator KENTONGAN AI',
                 'password' => Hash::make('password'),
                 'role' => 'super_admin',
                 'phone' => '081234567899',

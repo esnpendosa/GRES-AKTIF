@@ -11,13 +11,14 @@ use App\Livewire\PublicExplore;
 use App\Livewire\RegencyDashboard;
 use App\Livewire\ReportWizard;
 use App\Livewire\UserProfile;
+use App\Livewire\VillageReportIndex;
 use App\Livewire\VillageDashboard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes - GRES-AKTIF Platform
+| Web Routes - KENTONGAN AI Platform
 |--------------------------------------------------------------------------
 */
 
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/explore', PublicExplore::class)->name('explore');
 Route::get('/map', OpportunityMap::class)->name('map');
+Route::get('/laporan-desa', VillageReportIndex::class)->name('reports.villages');
 Route::get('/assets/{slug}', AssetDetailView::class)->name('assets.show');
 Route::get('/report', ReportWizard::class)->name('reports.create');
 Route::get('/profile', UserProfile::class)->name('profile');

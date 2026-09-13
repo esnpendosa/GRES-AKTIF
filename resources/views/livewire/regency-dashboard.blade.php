@@ -238,48 +238,88 @@
 
             </div>
 
-            <!-- BOTTOM TABLE: UPCOMING INSPECTIONS -->
+            <!-- MASTER INVENTARIS ASET DAERAH (KABUPATEN GRESIK) -->
             <div class="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
                 
-                <div class="p-4 border-b border-slate-100">
-                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-800">UPCOMING INSPECTIONS</h3>
+                <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-cyan-600"></span>
+                            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-800">MASTER INVENTARIS ASET DAERAH (OTORITAS KABUPATEN)</h3>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Otoritas penuh Bappeda / Kabupaten untuk mengelola, mengedit, dan membuat aset lintas desa.</p>
+                    </div>
+
+                    <button 
+                        type="button" 
+                        wire:click="openCreateAssetModal" 
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-xs transition-colors shrink-0"
+                    >
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        <span>+ Tambah Aset Daerah</span>
+                    </button>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-[#80cbc4]/70 text-slate-800 font-extrabold text-[11px] uppercase tracking-wider">
                             <tr>
-                                <th class="py-2.5 px-4 font-extrabold">NAME</th>
-                                <th class="py-2.5 px-4 font-extrabold">LAST INSPECTION</th>
-                                <th class="py-2.5 px-4 font-extrabold">ASSET TYPE</th>
-                                <th class="py-2.5 px-4 font-extrabold">NEXT INSPECTION</th>
+                                <th class="py-2.5 px-4 font-extrabold">NAMA ASET & LOKASI</th>
+                                <th class="py-2.5 px-4 font-extrabold">KECAMATAN / DESA</th>
+                                <th class="py-2.5 px-4 font-extrabold">KATEGORI</th>
+                                <th class="py-2.5 px-4 font-extrabold">SKOR KELAYAKAN</th>
+                                <th class="py-2.5 px-4 font-extrabold text-right">AKSI KABUPATEN</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-slate-700">
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="py-3 px-4 font-semibold text-slate-900">Pull up bars</td>
-                                <td class="py-3 px-4 text-slate-500">-</td>
-                                <td class="py-3 px-4 text-slate-600 font-medium">Pull-Up Bar</td>
-                                <td class="py-3 px-4 text-slate-900 font-bold">15 / 03 / 2025</td>
-                            </tr>
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="py-3 px-4 font-semibold text-slate-900">Skate park</td>
-                                <td class="py-3 px-4 text-slate-500">15 / 04 / 2025</td>
-                                <td class="py-3 px-4 text-slate-600 font-medium">Skatepark</td>
-                                <td class="py-3 px-4 text-slate-900 font-bold">15 / 04 / 2025</td>
-                            </tr>
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="py-3 px-4 font-semibold text-slate-900">Sign</td>
-                                <td class="py-3 px-4 text-slate-500">01 / 10 / 2025</td>
-                                <td class="py-3 px-4 text-slate-600 font-medium">Directional Sign</td>
-                                <td class="py-3 px-4 text-slate-900 font-bold">01 / 10 / 2025</td>
-                            </tr>
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="py-3 px-4 font-semibold text-slate-900">John Deere X540</td>
-                                <td class="py-3 px-4 text-slate-500">-</td>
-                                <td class="py-3 px-4 text-slate-600 font-medium">Tractor</td>
-                                <td class="py-3 px-4 text-slate-900 font-bold">23 / 10 / 2025</td>
-                            </tr>
+                            @forelse($allAssets as $a)
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <td class="py-3 px-4 font-semibold text-slate-900">
+                                        <div class="flex items-center gap-2">
+                                            <span>{{ $a->name }}</span>
+                                            <a href="{{ route('assets.show', $a->slug) }}" class="text-teal-600 hover:text-teal-800" title="Buka Detail">
+                                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                            </a>
+                                        </div>
+                                        <span class="text-[10px] text-slate-400 block">{{ $a->area }} m² &bull; {{ $a->target_activation_use ?? 'Sentra UMKM' }}</span>
+                                    </td>
+                                    <td class="py-3 px-4 text-slate-600">
+                                        <span class="font-medium text-slate-900 block">{{ $a->village->name ?? '-' }}</span>
+                                        <span class="text-[10px] text-slate-400">Kec. {{ $a->village->district->name ?? '-' }}</span>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold">
+                                            {{ $a->category->name ?? 'Fasilitas' }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4 text-teal-800 font-extrabold text-xs">
+                                        {{ $a->potential_score ?? 85 }}/100
+                                    </td>
+                                    <td class="py-3 px-4 text-right space-x-1">
+                                        <button 
+                                            type="button" 
+                                            wire:click="editAsset({{ $a->id }})" 
+                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold text-[11px] border border-teal-200 transition-colors"
+                                        >
+                                            <i data-lucide="edit-2" class="w-3 h-3"></i>
+                                            <span>Edit</span>
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            wire:click="deleteAsset({{ $a->id }})" 
+                                            wire:confirm="Hapus aset daerah ini dari database?" 
+                                            class="inline-flex items-center p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                            title="Hapus Aset"
+                                        >
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="py-6 text-center text-slate-400">Belum ada aset terdaftar.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -287,6 +327,101 @@
             </div>
 
         </div>
+
+        <!-- MODAL KELOLA / UBAH ASET KABUPATEN -->
+        @if($showAssetModal)
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+                <div class="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <div>
+                            <h3 class="font-heading font-bold text-base text-slate-900">
+                                {{ $editingAssetId ? 'Ubah Data Aset Daerah' : 'Tambah Aset Daerah Baru' }}
+                            </h3>
+                            <p class="text-[11px] text-slate-500">Otoritas Eksekutif: Bappedalitbang Kabupaten Gresik</p>
+                        </div>
+                        <button type="button" wire:click="$set('showAssetModal', false)" class="text-slate-400 hover:text-slate-600 p-1">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit="saveAsset" class="space-y-3.5 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Nama Aset Daerah *</label>
+                            <input type="text" wire:model="assetName" required class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs focus:ring-2 focus:ring-teal-500" placeholder="Contoh: Lahan Produktif Sentra Garam" />
+                            @error('assetName') <span class="text-rose-500 text-[11px]">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Lokasi Desa / Kelurahan *</label>
+                            <select wire:model="assetVillageId" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs">
+                                @foreach($allVillages as $v)
+                                    <option value="{{ $v->id }}">Desa {{ $v->name }} (Kec. {{ $v->district->name ?? '-' }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Kategori Fasilitas *</label>
+                                <select wire:model="assetCategoryId" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs">
+                                    @foreach($categories as $c)
+                                        <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Kondisi Aset *</label>
+                                <select wire:model="assetCondition" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs">
+                                    <option value="tidak_digunakan">Tidak Digunakan / Kosong</option>
+                                    <option value="kurang_produktif">Kurang Produktif</option>
+                                    <option value="terbengkalai">Terbengkalai</option>
+                                    <option value="produktif">Produktif</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Luas Lahan / Bangunan (m²) *</label>
+                                <input type="number" wire:model="assetArea" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs" />
+                            </div>
+
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Rencana Fungsi Utama *</label>
+                                <select wire:model="assetTargetUse" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs">
+                                    <option value="Sentra UMKM">Sentra UMKM</option>
+                                    <option value="Pusat Kuliner & Pujasera">Pusat Kuliner & Pujasera</option>
+                                    <option value="Pertanian / Tambak Produktif">Pertanian / Tambak Produktif</option>
+                                    <option value="Balai Pelatihan & Vokasi">Balai Pelatihan & Vokasi</option>
+                                    <option value="Ekowisata & Budaya">Ekowisata & Budaya</option>
+                                    <option value="Gudang Terpadu Daerah">Gudang Terpadu Daerah</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Alamat / Patokan Lokasi</label>
+                            <input type="text" wire:model="assetAddress" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs" placeholder="Contoh: Jl. Raya Pantura Km 15" />
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Deskripsi / Kajian Awal</label>
+                            <textarea wire:model="assetDescription" rows="3" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs" placeholder="Keterangan potensi aset..."></textarea>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                            <button type="button" wire:click="$set('showAssetModal', false)" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors">
+                                Batal
+                            </button>
+                            <button type="submit" class="px-5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-xs transition-colors">
+                                {{ $editingAssetId ? 'Simpan Perubahan' : 'Tambah Aset Daerah' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endif
 
         <!-- RIGHT ANALYTICS SIDEBAR (4 COLS: CATEGORIES + 2 DONUT CHARTS) -->
         <div class="xl:col-span-4 space-y-4">

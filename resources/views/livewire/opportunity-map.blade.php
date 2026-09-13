@@ -54,6 +54,18 @@
             this.map.addLayer(this.markersLayer);
             this.renderMarkers();
 
+            // Check if redirected from a fresh report
+            @if($focusLat && $focusLng)
+                this.map.setView([{{ $focusLat }}, {{ $focusLng }}], 16);
+                const pulseIcon = L.divIcon({
+                    className: 'new-report-pulse',
+                    html: `<div style='background-color: #00c9a7; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 15px #00c9a7; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 800; animation: bounce 1s infinite;'>📍</div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+                L.marker([{{ $focusLat }}, {{ $focusLng }}], { icon: pulseIcon }).addTo(this.map);
+            @endif
+
             // Deselect asset when clicking on empty map area
             this.map.on('click', () => {
                 this.activeAsset = null;

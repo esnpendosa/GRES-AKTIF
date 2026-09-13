@@ -19,6 +19,18 @@ class VillageDashboard extends Component
     public ?Village $village;
     public string $reportFilter = 'pending'; // pending, all
 
+    // Asset Management State (Scoped to current village)
+    public bool $showAssetModal = false;
+    public ?int $editingAssetId = null;
+    public string $assetName = '';
+    public ?int $assetCategoryId = null;
+    public string $assetCondition = 'tidak_digunakan';
+    public int $assetArea = 350;
+    public string $assetTargetUse = 'Sentra UMKM';
+    public string $assetAddress = '';
+    public string $assetStatus = 'verified';
+    public string $assetDescription = '';
+
     public function mount()
     {
         $user = Auth::user();
@@ -28,6 +40,118 @@ class VillageDashboard extends Component
             // Default to Sukomulyo (Flagship village)
             $this->village = Village::where('code', '3525010001')->first() ?? Village::first();
         }
+
+        $firstCat = AssetCategory::first();
+        if ($firstCat) {
+            $this->assetCategoryId = $firstCat->id;
+        }
+    }
+
+    public function openCreateAssetModal()
+    {
+        $this->reset(['editingAssetId', 'assetName', 'assetDescription', 'assetAddress']);
+        $this->assetCondition = 'tidak_digunakan';
+        $this->assetTargetUse = 'Sentra UMKM';
+        $this->assetArea = 350;
+        $this->assetStatus = 'verified';
+        $firstCat = AssetCategory::first();
+        $this->assetCategoryId = $firstCat ? $firstCat->id : 1;
+        $this->showAssetModal = true;
+    }
+
+    public function editAsset(int $assetId)
+    {
+        $villageId = $this->village ? $this->village->id : 1;
+        $asset = Asset::where('village_id', $villageId)->findOrFail($assetId);
+
+        $this->editingAssetId = $asset->id;
+        $this->assetName = $asset->name;
+        $this->assetCategoryId = $asset->category_id;
+        $this->assetCondition = $asset->condition;
+        $this->assetArea = (int)$asset->area;
+        $this->assetTargetUse = $asset->target_activation_use ?? 'Sentra UMKM';
+        $this->assetAddress = $asset->address ?? '';
+        $this->assetStatus = $asset->status;
+        $this->assetDescription = $asset->description ?? '';
+        $this->showAssetModal = true;
+    }
+
+    public function saveAsset()
+    {
+        $this->validate([
+            'assetName' => 'required|string|min:3|max:255',
+            'assetCategoryId' => 'required|exists:asset_categories,id',
+            'assetCondition' => 'required|string',
+            'assetArea' => 'required|numeric|min:1',
+            'assetTargetUse' => 'required|string',
+        ]);
+
+        $villageId = $this->village ? $this->village->id : 1;
+        $user = Auth::user();
+
+        if ($this->editingAssetId) {
+            // Scoped update
+            $asset = Asset::where('village_id', $villageId)->findOrFail($this->editingAssetId);
+            $asset->update([
+                'name' => $this->assetName,
+                'category_id' => $this->assetCategoryId,
+                'condition' => $this->assetCondition,
+                'area' => $this->assetArea,
+                'target_activation_use' => $this->assetTargetUse,
+                'address' => $this->assetAddress,
+                'status' => $this->assetStatus,
+                'description' => $this->assetDescription,
+            ]);
+
+            app(AiAnalysisService::class)->analyzeAndPersist($asset);
+            AuditLogger::log('updated', 'Asset', $asset->id, null, ['name' => $asset->name, 'village' => $this->village->name]);
+            session()->flash('success', "Aset '{$asset->name}' berhasil diperbarui oleh Pemdes!");
+        } else {
+            // Create scoped asset
+            $slug = Str::slug($this->assetName) . '-' . rand(100, 999);
+            $asset = Asset::create([
+                'village_id' => $villageId,
+                'category_id' => $this->assetCategoryId,
+                'created_by' => $user ? $user->id : 1,
+                'name' => $this->assetName,
+                'slug' => $slug,
+                'description' => $this->assetDescription ?: 'Aset inventarisasi resmi Pemerintah Desa.',
+                'condition' => $this->assetCondition,
+                'status' => $this->assetStatus,
+                'ownership_type' => 'Pemerintah Desa',
+                'area' => $this->assetArea,
+                'latitude' => $this->village->latitude ?? -7.1350,
+                'longitude' => $this->village->longitude ?? 112.6020,
+                'address' => $this->assetAddress ?: "Desa {$this->village->name}, Gresik",
+                'target_activation_use' => $this->assetTargetUse,
+                'verified_at' => now(),
+                'verified_by' => $user ? $user->id : null,
+            ]);
+
+            \App\Models\AssetImage::create([
+                'asset_id' => $asset->id,
+                'image_path' => 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80',
+                'caption' => 'Foto Aset Desa',
+                'is_primary' => true,
+            ]);
+
+            app(AiAnalysisService::class)->analyzeAndPersist($asset);
+            AuditLogger::log('created', 'Asset', $asset->id, null, ['name' => $asset->name, 'village' => $this->village->name]);
+            session()->flash('success', "Aset baru '{$asset->name}' berhasil ditambahkan ke inventaris Desa!");
+        }
+
+        $this->showAssetModal = false;
+    }
+
+    public function deleteAsset(int $assetId)
+    {
+        $villageId = $this->village ? $this->village->id : 1;
+        $asset = Asset::where('village_id', $villageId)->findOrFail($assetId);
+        $name = $asset->name;
+        $asset->delete();
+
+        AuditLogger::log('deleted', 'Asset', $assetId, null, ['name' => $name, 'village' => $this->village->name]);
+        session()->flash('success', "Aset '{$name}' telah dihapus dari inventaris.");
     }
 
     public function verifyReport(int $reportId, string $action, string $notes = '')
@@ -129,6 +253,7 @@ class VillageDashboard extends Component
 
         $reports = $reportsQuery->latest()->get();
         $recentAudits = AuditLog::with('user')->latest()->take(5)->get();
+        $categories = AssetCategory::all();
 
         return view('livewire.village-dashboard', compact(
             'assets',
@@ -138,7 +263,8 @@ class VillageDashboard extends Component
             'unusedAssets',
             'highPotentialAssets',
             'reports',
-            'recentAudits'
+            'recentAudits',
+            'categories'
         ))->layout('layouts.admin', [
             'title' => 'Dashboard Desa Sukomulyo',
             'headerTitle' => 'Pemerintah Desa Sukomulyo (Manyar)'

@@ -1,8 +1,15 @@
-# GRES-AKTIF &mdash; Gresik Asset Activation & Community Intelligence Platform
+# KENTONGAN AI &mdash; Kolaborasi Elektronik Netizen & AI untuk Optimalisasi Aset
 
-> *"Aset yang Diam, Menjadi Ekonomi."*
+> *"Platform milik bersama yang menggabungkan laporan warga (Netizen) dengan teknologi (AI) untuk menghidupkan aset mati berdasarkan masukan dan suara semua orang (Aspirasi Inklusif)."*
 
-**GRES-AKTIF** adalah platform *Smart Governance* berbasis AI & *Crowdsourcing* yang dirancang untuk mengidentifikasi aset desa/daerah yang tidur, terbengkalai, atau kurang produktif di seluruh 16 kecamatan Kabupaten Gresik, menganalisis kelayakan ekonomi, mengumpulkan konsensus kebutuhan warga, dan mengaktifkan aset menjadi fungsi produktif (Sentra UMKM, Pusat Kuliner, Pertanian/Tambak, Balai Vokasi, Ekowisata).
+---
+
+### 📌 Kepanjangan Platform
+**KENTONGAN AI** merupakan singkatan dari:
+> **K**olaborasi **E**lektronik **N**etizen & **T**eknologi **O**ptimalisasi **N**ilai **G**una **A**set **N**on-aktif untuk membentuk ekonomi baru.
+
+### 👥 Arti Inklusif bagi Warga
+Platform ini dirancang sebagai sistem milik bersama yang menjembatani partisipasi aktif masyarakat dengan kecerdasan buatan (*AI Analytics & Spatial GIS*). Setiap warga dapat menyuarakan temuan aset tidur, mengusulkan ide pemanfaatan bernilai ekonomi, dan bersama aparatur desa menentukan arah re-aktivasi aset secara transparan dan berkeadilan.
 
 ---
 

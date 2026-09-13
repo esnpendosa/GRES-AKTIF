@@ -5,11 +5,17 @@
     <div class="max-w-md w-full bg-white rounded-3xl p-8 border border-slate-200 shadow-xl space-y-6">
         
         <div class="text-center space-y-2">
-            <div class="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center mx-auto shadow-md shadow-teal-500/20">
-                <i data-lucide="layers" class="w-6 h-6"></i>
+            <!-- Modern Kentongan AI Logo Mark -->
+            <div class="relative flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-900 mx-auto shadow-md">
+                <svg viewBox="0 0 32 32" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="7" y="5" width="12" height="22" rx="3.5" stroke="#00c9a7" stroke-width="2.2" fill="#0f172a"/>
+                    <rect x="12" y="9" width="2" height="14" rx="1" fill="#38bdf8"/>
+                    <path d="M22 10C23.8 12.2 23.8 17.8 22 20" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M25 7C28 10.5 28 19.5 25 23" stroke="#00c9a7" stroke-width="2" stroke-linecap="round"/>
+                </svg>
             </div>
-            <h1 class="font-heading font-extrabold text-2xl text-slate-900">Masuk ke GRES-AKTIF</h1>
-            <p class="text-xs text-slate-500">Gresik Asset Activation & Community Intelligence</p>
+            <h1 class="font-heading font-extrabold text-2xl text-slate-900">Masuk ke KENTONGAN <span class="text-teal-700">AI</span></h1>
+            <p class="text-xs text-slate-500 font-medium">Kolaborasi Netizen & AI untuk Optimalisasi Aset</p>
         </div>
 
         <!-- 1-Click Demo Accounts Selector -->

@@ -13,33 +13,39 @@
                     
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold">
                         <span class="w-2 h-2 rounded-full bg-teal-600"></span>
-                        <span>Sistem Manajemen Aset Daerah Terpadu &bull; Kabupaten Gresik</span>
+                        <span>KENTONGAN AI &bull; Kolaborasi Netizen & Teknologi Optimalisasi Aset</span>
                     </div>
 
                     <div class="space-y-3">
                         <h1 class="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-slate-900 tracking-tight leading-tight">
-                            Optimalisasi & Aktivasi Aset Desa Menjadi Penggerak Ekonomi.
+                            Kolaborasi Netizen & AI untuk Optimalisasi Nilai Guna Aset Non-Aktif.
                         </h1>
                         <p class="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl">
-                            Platform kolaboratif Pemerintah Kabupaten Gresik untuk menginventarisasi aset desa yang belum termanfaatkan, menganalisis kelayakan fungsi ekonomi baru, dan mendukung kemandirian BUMDes secara terukur dan transparan.
+                            Platform milik bersama yang menggabungkan laporan warga (Netizen) dengan teknologi (AI) untuk menghidupkan aset mati menjadi penggerak ekonomi baru berdasarkan masukan dan suara semua orang (Aspirasi Inklusif).
                         </p>
                     </div>
 
-                    <!-- Core Principle Note -->
-                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 font-medium leading-relaxed max-w-xl">
-                        <span class="font-bold text-teal-800">Prinsip Kerja Sama:</span> "AI menemukan potensi, masyarakat menentukan kebutuhan, pemerintah mengaktifkan aset."
+                    <!-- Core Acronym & Inclusivity Callout -->
+                    <div class="p-4 rounded-2xl bg-teal-50/60 border border-teal-200/80 space-y-2 text-xs text-slate-700 leading-relaxed max-w-xl">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded bg-teal-700 text-white font-bold text-[10px] uppercase tracking-wider">Kepanjangan Platform</span>
+                            <span class="font-bold text-teal-900">KENTONGAN AI</span>
+                        </div>
+                        <p class="font-semibold text-slate-800">
+                            <strong>K</strong>olaborasi <strong>E</strong>lektronik <strong>N</strong>etizen & <strong>T</strong>eknologi <strong>O</strong>ptimalisasi <strong>N</strong>ilai <strong>G</strong>una <strong>A</strong>set <strong>N</strong>on-aktif untuk membentuk ekonomi baru.
+                        </p>
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="flex flex-col sm:flex-row items-center gap-3 pt-2">
                         <a href="{{ route('reports.create') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[#008080] hover:bg-[#006666] text-white font-semibold text-xs shadow-xs transition-colors">
                             <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                            <span>Laporkan Aset Desa</span>
+                            <span>Laporkan Aset Tidur</span>
                         </a>
 
                         <a href="{{ route('map') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors">
                             <i data-lucide="map" class="w-4 h-4 text-teal-600"></i>
-                            <span>Buka Peta Spasial GIS</span>
+                            <span>Buka Radar Spasial GIS</span>
                         </a>
                     </div>
 
@@ -268,6 +274,56 @@
                 <p class="text-slate-500 leading-relaxed">Aset dialokasikan untuk dikelola BUMDes bersama UMKM lokal dengan dukungan pendanaan APBD/APBDes.</p>
             </div>
 
+        </div>
+    </section>
+
+    <!-- INCLUSIVE CITIZEN PHILOSOPHY & ACRONYM BREAKDOWN -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-teal-950 rounded-3xl p-8 sm:p-12 text-white border border-slate-700 shadow-xl space-y-8">
+            <div class="max-w-3xl space-y-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-bold">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>Filosofi & Nilai Inklusif Platform</span>
+                </div>
+                <h2 class="font-heading font-extrabold text-2xl sm:text-3xl text-white tracking-tight">
+                    KENTONGAN AI: Platform Milik Bersama
+                </h2>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                    Platform ini milik bersama yang menggabungkan laporan warga (<strong class="text-white">Netizen</strong>) dengan teknologi (<strong class="text-teal-300">AI</strong>) untuk menghidupkan aset mati berdasarkan masukan dan suara semua orang (<strong class="text-white">Aspirasi Inklusif</strong>).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                <div class="bg-white/5 backdrop-blur-xs p-6 rounded-2xl border border-white/10 space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-teal-600/30 text-teal-300 flex items-center justify-center border border-teal-500/30">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-base text-white">1. Suara Warga (Netizen)</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Partisipasi warga sebagai sensor sosial utama. Setiap temuan aset terlantar dan usulan kebutuhan ekonomi dapat disuarakan langsung secara inklusif dan transparan.
+                    </p>
+                </div>
+
+                <div class="bg-white/5 backdrop-blur-xs p-6 rounded-2xl border border-white/10 space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-600/30 text-cyan-300 flex items-center justify-center border border-cyan-500/30">
+                        <i data-lucide="cpu" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-base text-white">2. Kecerdasan Buatan (AI)</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Analisis data spasial GIS, scoring kelayakan mikro, dan sintesis konsensus otomatis untuk membantu pemerintah dan desa mengambil keputusan berbasis data akurat.
+                    </p>
+                </div>
+
+                <div class="bg-white/5 backdrop-blur-xs p-6 rounded-2xl border border-white/10 space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600/30 text-emerald-300 flex items-center justify-center border border-emerald-500/30">
+                        <i data-lucide="trending-up" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-base text-white">3. Ekonomi Baru Berkelanjutan</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Mentransformasikan aset non-aktif menjadi sentra UMKM, pusat kuliner, ekowisata, dan balai vokasi guna menciptakan lapangan kerja dan pendapatan asli desa (PADes).
+                    </p>
+                </div>
+            </div>
         </div>
     </section>
 

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'GRES-AKTIF' }} | Asset Intelligence Platform</title>
+    <title>{{ $title ?? 'KENTONGAN AI' }} | Asset Intelligence Platform</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,15 +68,21 @@
     <!-- LEFT SIDEBAR (EXACT MATCH TO REFERENCE DESIGN) -->
     <aside class="w-60 flex flex-col flex-shrink-0 bg-white border-r border-slate-200/90 z-30 select-none">
         
-        <!-- Top Logo (C+ / G+ Logo Mark) -->
-        <div class="h-20 flex items-center justify-between px-6">
-            <a href="{{ route('home') }}" class="flex items-center gap-3">
-                <!-- Exact Stylized C+ / G+ Icon -->
-                <div class="relative flex items-center justify-center w-10 h-10">
-                    <svg viewBox="0 0 40 40" class="w-9 h-9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M26 12C23.5 9.5 19.5 9 16 11C11.5 13.5 9.5 18.5 11 23.5C12.5 28.5 17.5 31.5 22.5 30.5C25.5 30 28 28 29.5 25.5" stroke="#0f172a" stroke-width="3.5" stroke-linecap="round"/>
-                        <path d="M29 11L35 11M32 8L32 14" stroke="#0284c7" stroke-width="3" stroke-linecap="round"/>
+        <!-- Top Logo (Kentongan AI Logo Mark) -->
+        <div class="h-20 flex items-center justify-between px-5">
+            <a href="{{ route('home') }}" class="flex items-center gap-2.5">
+                <!-- Modern Kentongan AI Icon -->
+                <div class="relative flex items-center justify-center w-9 h-9 rounded-xl bg-slate-900 shadow-xs">
+                    <svg viewBox="0 0 32 32" class="w-5 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="7" y="5" width="12" height="22" rx="3.5" stroke="#00c9a7" stroke-width="2.2" fill="#0f172a"/>
+                        <rect x="12" y="9" width="2" height="14" rx="1" fill="#38bdf8"/>
+                        <path d="M22 10C23.8 12.2 23.8 17.8 22 20" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M25 7C28 10.5 28 19.5 25 23" stroke="#00c9a7" stroke-width="2" stroke-linecap="round"/>
                     </svg>
+                </div>
+                <div>
+                    <span class="font-heading font-extrabold text-sm text-slate-900 tracking-tight block">KENTONGAN <span class="text-teal-700">AI</span></span>
+                    <span class="text-[9px] text-slate-400 font-medium block -mt-1">Command Center</span>
                 </div>
             </a>
 
@@ -147,6 +153,12 @@
             <a href="{{ route('explore') }}" class="flex items-center gap-3 px-3.5 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors">
                 <i data-lucide="box" class="w-4 h-4 shrink-0 text-slate-500"></i>
                 <span>Assets</span>
+            </a>
+
+            <!-- Laporan Desa -->
+            <a href="{{ route('reports.villages') }}" class="flex items-center gap-3 px-3.5 py-2 rounded-lg {{ request()->routeIs('reports.villages') ? 'bg-[#008080] text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }} transition-colors">
+                <i data-lucide="building-2" class="w-4 h-4 shrink-0 {{ request()->routeIs('reports.villages') ? 'text-white' : 'text-slate-500' }}"></i>
+                <span>Laporan Desa</span>
             </a>
 
             <!-- 8. Maps -->
