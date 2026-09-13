@@ -1,4 +1,4 @@
-<div wire:poll.20s class="bg-gradient-to-r from-teal-900 via-slate-900 to-teal-950 text-white text-xs border-b border-teal-800/60 shadow-inner overflow-hidden" x-data="{ currentIndex: 0, itemsCount: {{ count($feedItems) }} }" x-init="if (itemsCount > 1) { setInterval(() => { currentIndex = (currentIndex + 1) % itemsCount }, 6000) }">
+<div wire:poll.5s class="bg-gradient-to-r from-teal-900 via-slate-900 to-teal-950 text-white text-xs border-b border-teal-800/60 shadow-inner overflow-hidden" x-data="{ currentIndex: 0, itemsCount: {{ count($feedItems) }} }" x-init="if (itemsCount > 1) { setInterval(() => { currentIndex = (currentIndex + 1) % itemsCount }, 6000) }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-4">
         
         <!-- Live Badge -->

@@ -146,22 +146,42 @@ class RegencyDashboard extends Component
 
     public function render()
     {
-        $totalAssets = 12842;
-        $productiveAssets = 8921;
-        $underutilizedAssets = 2713;
-        $unusedAssets = 1208;
-        $highOpportunityAssets = 326;
+        $assetsQuery = Asset::with(['village.district', 'category', 'images']);
+
+        if (!empty($this->selectedDistrict)) {
+            $assetsQuery->whereHas('village.district', function ($q) {
+                $q->where('name', $this->selectedDistrict);
+            });
+        }
+
+        if (!empty($this->selectedSector)) {
+            $s = $this->selectedSector;
+            $assetsQuery->where(function ($q) use ($s) {
+                $q->where('target_activation_use', 'like', "%{$s}%")
+                  ->orWhere('name', 'like', "%{$s}%")
+                  ->orWhereHas('category', fn($qc) => $qc->where('name', 'like', "%{$s}%"));
+            });
+        }
+
+        $allAssets = $assetsQuery->latest()->get();
+
+        $totalAssets = $allAssets->count();
+        $productiveAssets = $allAssets->where('status', 'productive')->count();
+        $underutilizedAssets = $allAssets->whereIn('condition', ['kurang_produktif', 'jarang_digunakan'])->count();
+        $unusedAssets = $allAssets->whereIn('condition', ['tidak_digunakan', 'terbengkalai', 'rusak'])->count();
+        $highOpportunityAssets = $allAssets->where('potential_score', '>=', 75)->count();
+        $totalValuation = $allAssets->sum('estimated_economic_value') ?: ($allAssets->sum('area') * 250000);
+        $totalReports = \App\Models\AssetReport::count();
 
         $topOpportunities = Asset::with(['village.district', 'category', 'images'])
-            ->where('potential_score', '>=', 80)
+            ->where('potential_score', '>=', 75)
             ->orderByDesc('potential_score')
-            ->take(5)
+            ->take(6)
             ->get();
 
         $districts = District::withCount('assets')->get();
         $categories = AssetCategory::withCount('assets')->get();
         $allVillages = \App\Models\Village::with('district')->orderBy('name')->get();
-        $allAssets = Asset::with(['village.district', 'category'])->latest()->get();
 
         return view('livewire.regency-dashboard', compact(
             'totalAssets',
@@ -169,6 +189,8 @@ class RegencyDashboard extends Component
             'underutilizedAssets',
             'unusedAssets',
             'highOpportunityAssets',
+            'totalValuation',
+            'totalReports',
             'topOpportunities',
             'districts',
             'categories',

@@ -27,34 +27,48 @@ class DistrictDashboard extends Component
     {
         $districtId = $this->district ? $this->district->id : 1;
 
-        $villages = Village::with(['assets'])
+        $villages = Village::with(['assets.category'])
+            ->withCount(['assets', 'reports'])
             ->where('district_id', $districtId)
             ->get();
 
-        $assets = Asset::with(['village', 'category'])
+        $assetsQuery = Asset::with(['village', 'category'])
             ->whereHas('village', function ($q) use ($districtId) {
                 $q->where('district_id', $districtId);
-            })->get();
+            });
 
-        $totalDesa = $this->district->total_villages ?: 23;
-        $totalAssets = 1248;
-        $unusedAssets = 124;
-        $underutilizedAssets = 238;
-        $highPotentialAssets = 43;
-        $communityReports = 217;
+        if (!empty($this->selectedCategory)) {
+            $assetsQuery->where('category_id', $this->selectedCategory);
+        }
+
+        $assets = $assetsQuery->get();
+
+        $totalDesa = $villages->count();
+        $totalAssets = $assets->count();
+        $productiveAssets = $assets->where('status', 'productive')->count();
+        $unusedAssets = $assets->whereIn('condition', ['tidak_digunakan', 'terbengkalai', 'rusak'])->count();
+        $underutilizedAssets = $assets->whereIn('condition', ['kurang_produktif', 'jarang_digunakan'])->count();
+        $highPotentialAssets = $assets->where('potential_score', '>=', 70)->count();
+        $communityReports = \App\Models\AssetReport::whereHas('village', fn($q) => $q->where('district_id', $districtId))->count();
+        $totalValuation = $assets->sum('estimated_economic_value') ?: ($assets->sum('area') * 250000);
+
+        $districtName = $this->district ? $this->district->name : 'Manyar';
 
         return view('livewire.district-dashboard', compact(
             'villages',
             'assets',
             'totalDesa',
             'totalAssets',
+            'productiveAssets',
             'unusedAssets',
             'underutilizedAssets',
             'highPotentialAssets',
-            'communityReports'
+            'communityReports',
+            'totalValuation',
+            'districtName'
         ))->layout('layouts.admin', [
-            'title' => 'Dashboard Kecamatan Manyar',
-            'headerTitle' => 'Pemerintah Kecamatan Manyar'
+            'title' => "Dashboard Kecamatan {$districtName}",
+            'headerTitle' => "Pemerintah Kecamatan {$districtName}"
         ]);
     }
 }

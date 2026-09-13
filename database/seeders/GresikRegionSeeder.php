@@ -123,6 +123,7 @@ class GresikRegionSeeder extends Seeder
                 'total_villages' => 26,
                 'villages' => [
                     ['name' => 'Mentaras', 'code' => '3525090001', 'postal_code' => '61155', 'latitude' => -7.0080, 'longitude' => 112.4850, 'area_sqkm' => 2.9, 'population' => 4800],
+                    ['name' => 'Gedongkedoan', 'code' => '3525090002', 'postal_code' => '61155', 'latitude' => -7.0120, 'longitude' => 112.4920, 'area_sqkm' => 3.1, 'population' => 5200],
                 ],
             ],
             [
@@ -200,6 +201,30 @@ class GresikRegionSeeder extends Seeder
                 'total_villages' => 23,
                 'villages' => [
                     ['name' => 'Duduksampeyan', 'code' => '3525160001', 'postal_code' => '61162', 'latitude' => -7.1550, 'longitude' => 112.5250, 'area_sqkm' => 3.6, 'population' => 6300],
+                ],
+            ],
+            [
+                'name' => 'Sangkapura',
+                'code' => 'SANGKAPURA',
+                'latitude' => -5.8500,
+                'longitude' => 112.6500,
+                'area_sqkm' => 118.72,
+                'total_villages' => 17,
+                'villages' => [
+                    ['name' => 'Kotakusuma', 'code' => '3525170001', 'postal_code' => '61181', 'latitude' => -5.8550, 'longitude' => 112.6450, 'area_sqkm' => 4.2, 'population' => 6200],
+                    ['name' => 'Sungairujing', 'code' => '3525170002', 'postal_code' => '61181', 'latitude' => -5.8620, 'longitude' => 112.6580, 'area_sqkm' => 5.1, 'population' => 5400],
+                ],
+            ],
+            [
+                'name' => 'Tambak',
+                'code' => 'TAMBAK',
+                'latitude' => -5.7500,
+                'longitude' => 112.6800,
+                'area_sqkm' => 77.55,
+                'total_villages' => 13,
+                'villages' => [
+                    ['name' => 'Tambak', 'code' => '3525180001', 'postal_code' => '61182', 'latitude' => -5.7480, 'longitude' => 112.6780, 'area_sqkm' => 4.8, 'population' => 5100],
+                    ['name' => 'Diponggo', 'code' => '3525180002', 'postal_code' => '61182', 'latitude' => -5.7350, 'longitude' => 112.6650, 'area_sqkm' => 3.9, 'population' => 4300],
                 ],
             ],
         ];

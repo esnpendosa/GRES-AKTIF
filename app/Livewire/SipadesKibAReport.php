@@ -55,8 +55,8 @@ class SipadesKibAReport extends Component
         if ($currentVillage) {
             $dbAssets = $currentVillage->assets;
             
-            // If the village is Gedongkedoan or has few assets, ensure we provide the exact standard SIPADES R3 items
-            if ($dbAssets->isEmpty() || str_contains(strtolower($currentVillage->name), 'gedongkedo')) {
+            // If the village has assets in the database, map them directly; otherwise provide standard SIPADES template items
+            if ($dbAssets->isEmpty()) {
                 $sampleItems = [
                     [
                         'name' => 'Tanah Bengkok Kepala Desa',

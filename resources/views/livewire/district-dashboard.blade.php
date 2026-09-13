@@ -1,90 +1,82 @@
-<div class="space-y-4">
+<div class="space-y-4" wire:poll.10s>
 
-    <!-- TOP KPI METRIC STRIP (EXACT REFERENCE DESIGN) -->
+    <!-- TOP KPI METRIC STRIP (DYNAMIC DISTRICT AGGREGATION) -->
     <div class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs">
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 divide-y md:divide-y-0 md:divide-x divide-slate-100 items-center">
             
             <!-- Group 1: ASSET HEALTH -->
             <div class="pr-0 md:pr-4 space-y-2">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">ASSET HEALTH (MANYAR)</span>
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">MONITORING KECAMATAN</span>
                 <div class="space-y-1.5 text-xs">
                     <div class="flex items-center justify-between gap-3">
-                        <span class="text-slate-500 text-[11px] w-20 shrink-0">Compliance</span>
+                        <span class="text-slate-500 text-[11px] w-24 shrink-0">Produktivitas</span>
                         <div class="flex-1 bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                            <div class="bg-blue-600 h-full rounded-full" style="width: 72%"></div>
+                            <div class="bg-emerald-600 h-full rounded-full transition-all" style="width: {{ $totalAssets > 0 ? round(($productiveAssets / $totalAssets) * 100) : 0 }}%"></div>
                         </div>
-                        <span class="text-blue-600 font-bold text-xs w-8 text-right">72%</span>
+                        <span class="text-emerald-600 font-bold text-xs w-9 text-right">{{ $totalAssets > 0 ? round(($productiveAssets / $totalAssets) * 100) : 0 }}%</span>
                     </div>
                     <div class="flex items-center justify-between gap-3">
-                        <span class="text-slate-500 text-[11px] w-20 shrink-0">Operational</span>
+                        <span class="text-slate-500 text-[11px] w-24 shrink-0">Potensi Tinggi</span>
                         <div class="flex-1 bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                            <div class="bg-[#ff5722] h-full rounded-full" style="width: 28%"></div>
+                            <div class="bg-teal-600 h-full rounded-full transition-all" style="width: {{ $totalAssets > 0 ? round(($highPotentialAssets / max(1, $totalAssets)) * 100) : 0 }}%"></div>
                         </div>
-                        <span class="text-[#ff5722] font-bold text-xs w-8 text-right">28%</span>
+                        <span class="text-teal-600 font-bold text-xs w-9 text-right">{{ $highPotentialAssets }}</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Group 2: TASKS -->
+            <!-- Group 2: TASKS & REPORTS -->
             <div class="px-0 md:px-4 space-y-2 pt-3 md:pt-0">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">TASKS (23 DESA)</span>
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">CAKUPAN WILAYAH</span>
                 <div class="grid grid-cols-3 gap-2 text-center">
                     <div>
-                        <span class="text-[10px] text-slate-500 block mb-1">Inspections</span>
-                        <span class="inline-flex items-center justify-center w-full py-1 rounded-lg bg-[#00c9a7] text-white font-bold text-xs">28</span>
+                        <span class="text-[10px] text-slate-500 block mb-1">Total Desa</span>
+                        <span class="inline-flex items-center justify-center w-full py-1 rounded-lg bg-teal-600 text-white font-bold text-xs">{{ $totalDesa }}</span>
                     </div>
                     <div>
-                        <span class="text-[10px] text-slate-500 block mb-1">Jobs</span>
-                        <span class="inline-flex items-center justify-center w-full py-1 rounded-lg bg-[#0284c7] text-white font-bold text-xs">96</span>
+                        <span class="text-[10px] text-slate-500 block mb-1">Laporan Warga</span>
+                        <span class="inline-flex items-center justify-center w-full py-1 rounded-lg bg-blue-600 text-white font-bold text-xs">{{ $communityReports }}</span>
                     </div>
                     <div>
-                        <span class="text-[10px] text-slate-500 block mb-1">Defects</span>
-                        <span class="inline-flex items-center justify-center w-full py-1 rounded-lg bg-[#ff5722] text-white font-bold text-xs">14</span>
+                        <span class="text-[10px] text-slate-500 block mb-1">Aset Rusak</span>
+                        <span class="inline-flex items-center justify-center w-full py-1 rounded-lg bg-amber-600 text-white font-bold text-xs">{{ $unusedAssets }}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Group 3: ASSET VALUE -->
             <div class="px-0 md:px-4 space-y-2 pt-3 md:pt-0">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">ASSET VALUE</span>
-                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">VALUASI SE-KECAMATAN</span>
+                <div class="grid grid-cols-2 gap-2 text-center text-xs">
                     <div>
-                        <span class="text-[10px] text-slate-500 block mb-0.5">Purchase</span>
-                        <span class="inline-block px-2 py-1 bg-slate-100 rounded text-slate-800 font-bold text-[11px]">Rp 420M</span>
+                        <span class="text-[10px] text-slate-500 block mb-0.5">Total Valuasi</span>
+                        <span class="inline-block px-2 py-1 bg-slate-100 rounded text-slate-800 font-bold text-[11px]">Rp {{ number_format($totalValuation / 1000000, 0, ',', '.') }} Jt</span>
                     </div>
                     <div>
-                        <span class="text-[10px] text-slate-500 block mb-0.5">Insurance</span>
-                        <span class="inline-block px-2 py-1 bg-slate-100 rounded text-slate-800 font-bold text-[11px]">Rp 680M</span>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-slate-500 block mb-0.5">Difference</span>
-                        <span class="inline-block px-2 py-1 bg-slate-100 rounded text-emerald-700 font-bold text-[11px]">+61.9%</span>
+                        <span class="text-[10px] text-slate-500 block mb-0.5">Rata-rata/Desa</span>
+                        <span class="inline-block px-2 py-1 bg-slate-100 rounded text-emerald-700 font-bold text-[11px]">Rp {{ number_format(($totalValuation / max(1, $totalDesa)) / 1000000, 0, ',', '.') }} Jt</span>
                     </div>
                 </div>
             </div>
 
             <!-- Group 4: TOTAL ASSETS -->
             <div class="pl-0 md:pl-4 space-y-2 pt-3 md:pt-0">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">TOTAL ASSETS</span>
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">TOTAL ASET KECAMATAN</span>
                 <div class="flex items-center gap-1.5 justify-between">
                     <div class="text-center">
-                        <span class="text-[10px] text-slate-500 block mb-0.5">Count</span>
-                        <span class="inline-block px-2 py-1 border-2 border-cyan-500 text-cyan-600 font-extrabold text-xs rounded-md">{{ $totalAssets }}</span>
+                        <span class="text-[10px] text-slate-500 block mb-0.5">Total</span>
+                        <span class="inline-block px-2 py-1 border-2 border-teal-500 text-teal-700 font-extrabold text-xs rounded-md">{{ $totalAssets }}</span>
                     </div>
                     <div class="text-center">
-                        <span class="text-[10px] text-slate-500 block mb-0.5">Active</span>
-                        <span class="inline-block px-2.5 py-1 bg-teal-600 text-white font-extrabold text-xs rounded-md">84</span>
+                        <span class="text-[10px] text-slate-500 block mb-0.5">Aktif</span>
+                        <span class="inline-block px-2.5 py-1 bg-emerald-600 text-white font-extrabold text-xs rounded-md">{{ $productiveAssets }}</span>
                     </div>
                     <div class="text-center">
-                        <span class="text-[10px] text-slate-500 block mb-0.5">Inactive</span>
-                        <span class="inline-block px-2.5 py-1 bg-cyan-500 text-white font-extrabold text-xs rounded-md">{{ $unusedAssets }}</span>
-                    </div>
-                    <div class="text-center">
-                        <span class="text-[10px] text-slate-500 block mb-0.5">Disposed</span>
-                        <span class="inline-block px-2.5 py-1 bg-slate-400 text-white font-extrabold text-xs rounded-md">32</span>
+                        <span class="text-[10px] text-slate-500 block mb-0.5">Kurang Aktif</span>
+                        <span class="inline-block px-2.5 py-1 bg-amber-500 text-white font-extrabold text-xs rounded-md">{{ $underutilizedAssets }}</span>
                     </div>
                     <a href="{{ route('map') }}" class="w-7 h-7 rounded-full border border-slate-300 hover:border-teal-600 hover:text-teal-600 flex items-center justify-center text-slate-400 transition-colors shrink-0 self-end mb-0.5" title="Peta Wilayah">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <i data-lucide="map" class="w-4 h-4"></i>
                     </a>
                 </div>
             </div>

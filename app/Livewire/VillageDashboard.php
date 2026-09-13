@@ -238,14 +238,21 @@ class VillageDashboard extends Component
             ->where('village_id', $villageId)
             ->get();
 
-        $totalAssets = $assets->count() + 120; // Demo combined scale
-        $productiveAssets = $assets->where('status', 'productive')->count() + 79;
-        $underutilizedAssets = $assets->whereIn('condition', ['kurang_produktif', 'jarang_digunakan'])->count() + 30;
-        $unusedAssets = $assets->whereIn('condition', ['tidak_digunakan', 'terbengkalai', 'rusak'])->count() + 16;
-        $highPotentialAssets = $assets->where('potential_score', '>=', 71)->count() + 11;
+        $totalAssets = $assets->count();
+        $productiveAssets = $assets->where('status', 'productive')->count();
+        $underutilizedAssets = $assets->whereIn('condition', ['kurang_produktif', 'jarang_digunakan'])->count();
+        $unusedAssets = $assets->whereIn('condition', ['tidak_digunakan', 'terbengkalai', 'rusak'])->count();
+        $highPotentialAssets = $assets->where('potential_score', '>=', 71)->count();
+        $disposedAssets = $assets->where('status', 'disposed')->count();
+
+        $totalValuation = $assets->sum('estimated_economic_value') ?: ($assets->sum('area') * 250000);
+        $totalArea = $assets->sum('area');
 
         $reportsQuery = AssetReport::with(['user', 'category'])
             ->where('village_id', $villageId);
+
+        $pendingReportsCount = AssetReport::where('village_id', $villageId)->where('status', 'pending')->count();
+        $totalReportsCount = AssetReport::where('village_id', $villageId)->count();
 
         if ($this->reportFilter === 'pending') {
             $reportsQuery->where('status', 'pending');
@@ -255,6 +262,12 @@ class VillageDashboard extends Component
         $recentAudits = AuditLog::with('user')->latest()->take(5)->get();
         $categories = AssetCategory::all();
 
+        $compliancePercentage = $totalAssets > 0 ? round(($assets->whereNotNull('verified_at')->count() / $totalAssets) * 100) : 100;
+        $operationalPercentage = $totalAssets > 0 ? round(($productiveAssets / $totalAssets) * 100) : 0;
+
+        $villageName = $this->village ? $this->village->name : 'Sukomulyo';
+        $districtName = $this->village && $this->village->district ? $this->village->district->name : 'Manyar';
+
         return view('livewire.village-dashboard', compact(
             'assets',
             'totalAssets',
@@ -262,12 +275,19 @@ class VillageDashboard extends Component
             'underutilizedAssets',
             'unusedAssets',
             'highPotentialAssets',
+            'disposedAssets',
+            'totalValuation',
+            'totalArea',
+            'pendingReportsCount',
+            'totalReportsCount',
+            'compliancePercentage',
+            'operationalPercentage',
             'reports',
             'recentAudits',
             'categories'
         ))->layout('layouts.admin', [
-            'title' => 'Dashboard Desa Sukomulyo',
-            'headerTitle' => 'Pemerintah Desa Sukomulyo (Manyar)'
+            'title' => "Dashboard Desa {$villageName}",
+            'headerTitle' => "Pemerintah Desa {$villageName} ({$districtName})"
         ]);
     }
 }
