@@ -162,8 +162,8 @@
                             });
 
                             L.control.layers({
-                                '🛰️ Google Earth': googleEarth,
-                                '🗺️ Peta Jalan': streetMap
+                                'Citra Satelit': googleEarth,
+                                'Peta Standar': streetMap
                             }, null, { position: 'topright' }).addTo(this.mapInstance);
 
                             this.markerInstance = L.marker([{{ $latitude }}, {{ $longitude }}], { draggable: true }).addTo(this.mapInstance);
@@ -228,7 +228,7 @@
                                 <svg class="w-4 h-4 text-amber-300" :class="scanning ? 'animate-spin' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.071-7.071l-1.414 1.414M8.343 15.657l-1.414 1.414m12.728 0l-1.414-1.414M8.343 8.343L6.929 6.929M12 8a4 4 0 100 8 4 4 0 000-8z" />
                                 </svg>
-                                <span x-text="scanning ? 'Memindai Radar GPS...' : '📍 Pindai Lokasi Saya Sekarang'">📍 Pindai Lokasi Saya Sekarang</span>
+                                <span x-text="scanning ? 'Memindai Radar GPS...' : 'Pindai Lokasi Saya Sekarang'">Pindai Lokasi Saya Sekarang</span>
                             </button>
                         </div>
 

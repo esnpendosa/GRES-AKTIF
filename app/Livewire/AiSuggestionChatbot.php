@@ -6,6 +6,7 @@ use App\Models\Asset;
 use App\Models\AssetIdea;
 use App\Models\IdeaVote;
 use App\Models\User;
+use App\Services\Ai\OpenRouterAiService;
 use App\Services\AuditLogger;
 use App\Services\GamificationService;
 use Illuminate\Support\Facades\Auth;
@@ -31,7 +32,7 @@ class AiSuggestionChatbot extends Component
         $this->messages = [
             [
                 'role' => 'assistant',
-                'text' => "Halo! Saya **Asisten AI KENTONGAN**, siap membantumu merancang gagasan pemanfaatan aset desa yang bernilai ekonomi. Pilih aset yang ingin dibahas atau tanyakan ide kreatif apa pun!",
+                'text' => "Selamat datang di Konsultasi Perencanaan Aset Daerah. Saya Asisten AI KENTONGAN yang terintegrasi dengan data spasial dan kelayakan ekonomi Bappedalitbang Kabupaten Gresik. Silakan pilih aset yang ingin dikaji atau sampaikan gagasan pemanfaatan ekonomi baru.",
                 'time' => now()->format('H:i'),
                 'proposal' => null,
             ]
@@ -52,7 +53,7 @@ class AiSuggestionChatbot extends Component
         $this->isModalOpen = true;
         $asset = Asset::find($assetId);
         if ($asset) {
-            $this->sendQuickPrompt("Berikan rekomendasi ide pemanfaatan terbaik untuk {$asset->name}");
+            $this->sendQuickPrompt("Berikan analisis dan rekomendasi pemanfaatan terbaik untuk {$asset->name}");
         }
     }
 
@@ -84,9 +85,13 @@ class AiSuggestionChatbot extends Component
     protected function generateAiResponse(string $prompt)
     {
         $asset = $this->selectedAssetId ? Asset::with(['village.district', 'category'])->find($this->selectedAssetId) : null;
-        $assetName = $asset ? $asset->name : 'Aset Desa di Gresik';
-        $villageName = $asset?->village?->name ?? 'Gresik';
-        $districtName = $asset?->village?->district?->name ?? 'Manyar';
+        $assetName = $asset ? $asset->name : 'Aset Desa Kabupaten Gresik';
+        $villageName = $asset?->village?->name ?? 'Sukomulyo';
+
+        // Realtime AI integration via OpenRouter
+        $openRouter = app(OpenRouterAiService::class);
+        $result = $openRouter->chat($this->messages, $asset);
+        $aiText = $result['reply'];
 
         $lower = strtolower($prompt);
         $category = 'UMKM';
@@ -97,47 +102,18 @@ class AiSuggestionChatbot extends Component
             $category = 'Kuliner';
             $title = "Sentra Pujasera & Kuliner Khas Pesisir {$villageName}";
             $desc = "Pembangunan kios kuliner higienis, area santai outdoor, dan pusat jajanan UMKM malam hari untuk menghidupkan perekonomian desa.";
-            $aiText = "Berdasarkan analisis lokasi di **Desa {$villageName} (Kec. {$districtName})**, aset **{$assetName}** sangat strategis untuk dikembangkan menjadi **Pusat Kuliner & Pujasera BUMDes**.\n\n" .
-                "**💡 Keunggulan Rencana:**\n" .
-                "1. **Trafik Pengunjung**: Menangkap pasar pekerja industri dan warga sekitar.\n" .
-                "2. **Pemberdayaan**: Menyediakan 10-15 tenant usaha untuk ibu-ibu PKK dan pedagang lokal.\n" .
-                "3. **Skema BUMDes**: Sewa terjangkau + bagi hasil kebersihan & retribusi PADes.";
         } elseif (str_contains($lower, 'tani') || str_contains($lower, 'tambak') || str_contains($lower, 'hidroponik') || str_contains($lower, 'greenhouse')) {
             $category = 'Pertanian';
             $title = "Integrated Urban Farming & Greenhouse Modern {$villageName}";
             $desc = "Pengembangan pertanian presisi bernilai tinggi (melon hidroponik, sayur organik, dan budidaya ikan air payau).";
-            $aiText = "Aset **{$assetName}** memiliki potensi agrokultur tinggi. AI merekomendasikan konsep **Greenhouse & Pertanian Presisi Terpadu**.\n\n" .
-                "**🌱 Manfaat Ekonomi:**\n" .
-                "1. **Produktivitas Tinggi**: Hasil panen melon premium & sayuran hidroponik untuk suplai resto & supermarket.\n" .
-                "2. **Edukasi**: Menjadi laboratorium vokasi bagi pemuda tani milenial desa.\n" .
-                "3. **Estimasi ROI**: Balik modal dalam 14-18 bulan melalui kemitraan off-taker.";
         } elseif (str_contains($lower, 'wisata') || str_contains($lower, 'budaya') || str_contains($lower, 'taman') || str_contains($lower, 'rekreasi')) {
             $category = 'Wisata';
             $title = "Taman Ekowisata Edukasi & Spot Kreatif Warga {$villageName}";
             $desc = "Ruang terbuka hijau ramah anak dengan panggung seni budaya dan spot foto instagramable.";
-            $aiText = "Karakteristik aset **{$assetName}** sangat cocok ditransformasikan menjadi **Destinasi Ekowisata & Ruang Publik Kreatif**.\n\n" .
-                "**🌟 Pilar Pengembangan:**\n" .
-                "1. **Revitalisasi Lansekap**: Jalur pedestrian santai, lampu tematik, dan amphitheater mini.\n" .
-                "2. **Event Mingguan**: Pasar kaget akhir pekan dan festival budaya desa.\n" .
-                "3. **Inklusivitas**: Ramah lansia, difabel, dan ruang bermain anak aman.";
         } elseif (str_contains($lower, 'vokasi') || str_contains($lower, 'pelatihan') || str_contains($lower, 'kursus') || str_contains($lower, 'skill')) {
             $category = 'Pendidikan';
             $title = "Balai Vokasi & Digital Creative Hub Desa {$villageName}";
             $desc = "Pusat pelatihan keahlian kerja industri, digital marketing UMKM, dan sertifikasi teknis anak muda.";
-            $aiText = "Mengingat Gresik adalah kawasan industri maju, transformasi **{$assetName}** menjadi **Balai Pelatihan Kerja & Co-Working Space Desa** sangat mendesak!\n\n" .
-                "**💻 Program Utama:**\n" .
-                "1. Pelatihan operator industri, pengelasan, dan teknisi mesin.\n" .
-                "2. Studio foto produk & live streaming jualan online untuk pelaku UMKM lokal.\n" .
-                "3. Inkubasi startup desa dan literasi keuangan.";
-        } else {
-            $category = 'UMKM';
-            $title = "Sentra Bisnis Terpadu & Inkubator UMKM {$villageName}";
-            $desc = "Pusat perdagangan bersama produk unggulan desa dengan fasilitas logistik dan display modern.";
-            $aiText = "Hasil komputasi algoritma AI untuk **{$assetName}** menunjukkan skor potensi **89/100** untuk fungsi **Sentra Bisnis & UMKM Terpadu**.\n\n" .
-                "**📊 Rekomendasi AI:**\n" .
-                "1. **Zonasi Fleksibel**: 60% kios ritel UMKM, 20% area workshop/produksi, 20% area pelayanan warga.\n" .
-                "2. **Sinergi APBDes & BUMDes**: Modal revitalisasi bertahap dengan pelibatan gotong royong warga.\n" .
-                "3. **Prospek PADes**: Berpotensi menyumbang Rp 45.000.000 - Rp 90.000.000/tahun untuk kas desa.";
         }
 
         $proposal = [
@@ -196,7 +172,7 @@ class AiSuggestionChatbot extends Component
 
         $this->messages[] = [
             'role' => 'assistant',
-            'text' => "🎉 **Sukses!** Usulan gagasan *\"{$title}\"* telah resmi tersimpan di sistem **KENTONGAN AI** dan masuk ke papan aspirasi warga. Kamu mendapatkan **+10 Poin Warga**!",
+            'text' => "Usulan gagasan \"{$title}\" telah berhasil disimpan ke dalam sistem basis data perencanaan daerah dan tercatat di papan aspirasi warga (+10 Poin Partisipasi).",
             'time' => now()->format('H:i'),
             'proposal' => null,
         ];

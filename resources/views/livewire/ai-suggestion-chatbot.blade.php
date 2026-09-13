@@ -98,10 +98,8 @@
                                                 wire:click="submitProposal('{{ addslashes($msg['proposal']['title']) }}', '{{ addslashes($msg['proposal']['category']) }}', '{{ addslashes($msg['proposal']['description']) }}', {{ $msg['proposal']['asset_id'] ?? 'null' }})"
                                                 class="w-full py-2 px-3 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all active:scale-95 cursor-pointer"
                                             >
-                                                <svg class="w-4 h-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                                                </svg>
-                                                <span>💡 Jadikan Usulan Resmi Warga</span>
+                                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                                <span>Jadikan Usulan Resmi Warga</span>
                                             </button>
                                         </div>
                                     @endif
@@ -124,19 +122,19 @@
                 </div>
 
                 <!-- Quick Prompt Chips -->
-                <div class="px-4 py-2 bg-white border-t border-slate-100 flex items-center gap-2 overflow-x-auto text-[11px] shrink-0">
+                <div class="px-4 py-2 bg-white border-t border-slate-100 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-[11px] shrink-0">
                     <span class="text-slate-400 font-bold shrink-0">Contoh:</span>
                     <button type="button" wire:click="sendQuickPrompt('Rekomendasi konsep Sentra Kuliner & Pujasera UMKM')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-700 font-medium shrink-0 transition-colors">
-                        🍲 Pusat Kuliner
+                        Pusat Kuliner
                     </button>
                     <button type="button" wire:click="sendQuickPrompt('Ide Greenhouse Pertanian Modern & Tambak')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-700 font-medium shrink-0 transition-colors">
-                        🌱 Pertanian Modern
+                        Pertanian Modern
                     </button>
                     <button type="button" wire:click="sendQuickPrompt('Konsep Balai Pelatihan Vokasi & Digital Hub')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-700 font-medium shrink-0 transition-colors">
-                        💻 Balai Vokasi
+                        Balai Vokasi
                     </button>
                     <button type="button" wire:click="sendQuickPrompt('Konsep Ekowisata Budaya & Taman Terbuka')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-700 font-medium shrink-0 transition-colors">
-                        🌳 Ekowisata
+                        Ekowisata
                     </button>
                 </div>
 

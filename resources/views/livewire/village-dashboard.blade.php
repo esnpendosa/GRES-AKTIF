@@ -124,8 +124,8 @@
                             });
 
                             L.control.layers({
-                                '🛰️ Google Earth': googleEarth,
-                                '🗺️ Peta Jalan': streetMap
+                                'Citra Satelit': googleEarth,
+                                'Peta Standar': streetMap
                             }, null, { position: 'topright' }).addTo(map);
 
                             // Authentic GIS Geo-boundary Polygon (Sukomulyo Zone)

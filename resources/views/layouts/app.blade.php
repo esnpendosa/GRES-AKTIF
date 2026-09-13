@@ -180,7 +180,7 @@
             <a href="{{ route('explore') }}" class="block px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-800">Jelajahi Aset</a>
             <a href="{{ route('map') }}" class="block px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-800">Peta Spasial GIS</a>
             <a href="{{ route('reports.villages') }}" class="block px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-800">Laporan per Desa</a>
-            <button @click="$dispatch('open-ai-chatbot')" class="w-full text-left block px-3 py-2 rounded-lg bg-teal-50 text-teal-800 font-bold">✨ Saran AI & Usulan Ide</button>
+            <button @click="$dispatch('open-ai-chatbot')" class="w-full text-left block px-3 py-2 rounded-lg bg-teal-50 text-teal-800 font-bold">Saran AI & Usulan Ide</button>
             <a href="{{ route('reports.create') }}" class="block px-3 py-2 rounded-lg bg-slate-100 text-slate-800 font-bold">+ Laporkan Aset Baru</a>
         </div>
     </header>

@@ -29,7 +29,7 @@
             // Add Zoom Control at bottomleft
             L.control.zoom({ position: 'bottomleft' }).addTo(this.map);
 
-            // Google Earth Satellite Hybrid + Standard OSM layer
+            // Satellite Hybrid + Standard Street Map
             const googleEarth = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
                 maxZoom: 20,
                 subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
@@ -40,8 +40,8 @@
             });
 
             L.control.layers({
-                '🛰️ Google Earth': googleEarth,
-                '🗺️ Peta Jalan': streetMap
+                'Citra Satelit': googleEarth,
+                'Peta Jalan': streetMap
             }, null, { position: 'topright' }).addTo(this.map);
 
             this.markersLayer = L.markerClusterGroup({
@@ -59,9 +59,9 @@
                 this.map.setView([{{ $focusLat }}, {{ $focusLng }}], 16);
                 const pulseIcon = L.divIcon({
                     className: 'new-report-pulse',
-                    html: `<div style='background-color: #00c9a7; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 15px #00c9a7; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 800; animation: bounce 1s infinite;'>📍</div>`,
-                    iconSize: [32, 32],
-                    iconAnchor: [16, 16]
+                    html: `<div style='background-color: #00c9a7; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 15px #00c9a7; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 800; animation: bounce 1s infinite;'>•</div>`,
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14]
                 });
                 L.marker([{{ $focusLat }}, {{ $focusLng }}], { icon: pulseIcon }).addTo(this.map);
             @endif
@@ -114,7 +114,7 @@
 
     <!-- Top Sector Filter Bar (Floating Sticky) -->
     <div class="absolute top-3 left-4 right-16 z-20 pointer-events-none">
-        <div class="max-w-4xl mx-auto flex items-center gap-1.5 overflow-x-auto p-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md pointer-events-auto">
+        <div class="max-w-4xl mx-auto flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden p-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md pointer-events-auto">
             <span class="text-xs font-bold text-slate-800 px-2.5 shrink-0 flex items-center gap-1.5">
                 <i data-lucide="layers" class="w-4 h-4 text-teal-700"></i>
                 <span class="hidden sm:inline">Peluang Sektor:</span>
@@ -170,7 +170,7 @@
                 class="px-3.5 py-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold shrink-0 flex items-center gap-1.5 shadow-xs transition-colors"
             >
                 <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-300"></i>
-                <span>+ Sumbang Ide</span>
+                <span>+ Usulkan Ide</span>
             </button>
 
             <!-- Filter Drawer Toggle -->
@@ -188,18 +188,6 @@
     <!-- Map Canvas (Left / Center) -->
     <div class="flex-1 h-full relative z-0">
         <div id="opportunityMapContainer" wire:ignore class="w-full h-full bg-slate-200"></div>
-
-        <!-- Floating FAB Button: Sumbang Ide (Bottom Right) -->
-        <div class="absolute bottom-6 right-6 z-20">
-            <button 
-                type="button" 
-                wire:click="openIdeaModal()"
-                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xl border border-slate-700 hover:scale-105 active:scale-95 transition-all"
-            >
-                <i data-lucide="lightbulb" class="w-4 h-4 text-amber-400"></i>
-                <span>Sumbang Ide Warga (+10 Pts)</span>
-            </button>
-        </div>
 
         <!-- Legend Overlay (Bottom Left above zoom) -->
         <div class="absolute bottom-16 left-4 z-20 hidden sm:block bg-white/95 backdrop-blur-md rounded-2xl p-3 border border-slate-200/90 shadow-md text-xs space-y-1.5">
