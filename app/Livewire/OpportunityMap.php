@@ -35,6 +35,8 @@ class OpportunityMap extends Component
     public bool $showNewReportToast = false;
     public ?float $focusLat = null;
     public ?float $focusLng = null;
+    public ?string $newReportTitle = null;
+    public ?string $newReportVillage = null;
 
     public function mount()
     {
@@ -53,6 +55,17 @@ class OpportunityMap extends Component
             if (request()->query('lat') && request()->query('lng')) {
                 $this->focusLat = (float)request()->query('lat');
                 $this->focusLng = (float)request()->query('lng');
+            }
+
+            $reportId = (int)request()->query('newReport');
+            $report = \App\Models\AssetReport::with(['village.district', 'category'])->find($reportId);
+            if ($report) {
+                $this->newReportTitle = $report->title;
+                $this->newReportVillage = ($report->village ? "Desa " . $report->village->name : 'Kabupaten Gresik') . ($report->village?->district ? ', Kec. ' . $report->village->district->name : '');
+                if (!$this->focusLat && $report->latitude) {
+                    $this->focusLat = (float)$report->latitude;
+                    $this->focusLng = (float)$report->longitude;
+                }
             }
         }
     }
@@ -108,6 +121,9 @@ class OpportunityMap extends Component
         if ($asset) {
             app(\App\Services\Ai\AiAnalysisService::class)->updateConsensus($asset);
         }
+
+        // Send email notification to admin
+        \App\Services\EmailNotificationService::sendNewIdeaProposal($idea->load(['asset', 'user']), 'Peta Peluang Warga');
 
         $this->ideaTitle = '';
         $this->ideaDescription = '';
@@ -223,6 +239,6 @@ class OpportunityMap extends Component
             'assetsPayload',
             'selectedSector',
             'showGlobalIdeaModal'
-        ))->layout('layouts.app', ['title' => 'Peta Peluang AI & GIS Aset Gresik']);
+        ))->layout('layouts.admin', ['title' => 'Peta GIS Sebaran Aset Gresik']);
     }
 }

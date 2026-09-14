@@ -129,6 +129,6 @@ class PublicExplore extends Component
         $districts = District::withCount('assets')->get();
 
         return view('livewire.public-explore', compact('assets', 'categories', 'districts'))
-            ->layout('layouts.app', ['title' => 'Jelajahi Aset Desa & Potensi Ekonomi']);
+            ->layout('layouts.admin', ['title' => 'Data Aset Desa & Potensi Ekonomi']);
     }
 }

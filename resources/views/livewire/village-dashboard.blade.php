@@ -75,9 +75,11 @@
                         <span class="text-[10px] text-slate-500 block mb-0.5">Non-Aktif</span>
                         <span class="inline-block px-2.5 py-1 bg-amber-500 text-white font-extrabold text-xs rounded-md">{{ $underutilizedAssets + $unusedAssets }}</span>
                     </div>
-                    <button type="button" wire:click="openCreateAssetModal" class="w-7 h-7 rounded-full border border-slate-300 hover:border-teal-600 hover:text-teal-600 flex items-center justify-center text-slate-400 transition-colors shrink-0 self-end mb-0.5 cursor-pointer" title="Tambah Aset">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                    </button>
+                    @if(!auth()->user()?->isDistrictAdmin())
+                        <button type="button" wire:click="openCreateAssetModal" class="w-7 h-7 rounded-full border border-slate-300 hover:border-teal-600 hover:text-teal-600 flex items-center justify-center text-slate-400 transition-colors shrink-0 self-end mb-0.5 cursor-pointer" title="Tambah Aset">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                        </button>
+                    @endif
                 </div>
             </div>
 
@@ -91,90 +93,69 @@
         <div class="xl:col-span-8 space-y-4">
             
             <!-- GIS MAP CONTAINER WITH FLOATING CARDS OVERLAY -->
-            <div class="relative bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
+            <div class="relative bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs" x-data="{ cardInspection: true, cardRoutine: true }">
                 
+                <!-- Data aset & batas desa untuk peta (dibaca oleh JS di admin.blade.php) -->
+                <div id="village-asset-data" wire:ignore
+                     data-assets="{{ json_encode($assets->filter(fn($a) => $a->latitude && $a->longitude)->map(fn($a) => [
+                         'lat'       => (float) $a->latitude,
+                         'lng'       => (float) $a->longitude,
+                         'name'      => $a->name,
+                         'condition' => $a->condition ?? 'produktif',
+                         'category'  => optional($a->category)->name ?? '-',
+                         'id'        => $a->id,
+                     ])->values()) }}"
+                     data-boundary="{{ json_encode($village?->getBoundaryCoords() ?? []) }}"
+                     data-village-name="{{ $village?->name ?? 'Desa' }}"
+                     class="hidden"></div>
+
                 <!-- Leaflet Map Container -->
                 <div 
                     id="referenceVillageMap" 
                     wire:ignore 
                     class="h-[380px] w-full z-0 bg-[#e5e9ec]"
-                    x-data="{
-                        init() {
-                            const map = L.map('referenceVillageMap', {
-                                zoomControl: true,
-                                attributionControl: false
-                            }).setView([-7.1350, 112.6020], 15);
-
-                            // Google Earth Satellite Hybrid + Standard OSM layer
-                            const googleEarth = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-                                maxZoom: 20,
-                                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-                            }).addTo(map);
-
-                            const streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                maxZoom: 19
-                            });
-
-                            L.control.layers({
-                                'Citra Satelit': googleEarth,
-                                'Peta Standar': streetMap
-                            }, null, { position: 'topright' }).addTo(map);
-
-                            // Authentic GIS Geo-boundary Polygon (Sukomulyo Zone)
-                            const polygonCoords = [
-                                [-7.1320, 112.5980],
-                                [-7.1300, 112.6040],
-                                [-7.1380, 112.6080],
-                                [-7.1410, 112.6020],
-                                [-7.1360, 112.5960]
-                            ];
-                            L.polygon(polygonCoords, {
-                                color: '#0284c7',
-                                weight: 2,
-                                fillColor: '#0284c7',
-                                fillOpacity: 0.06,
-                                dashArray: '4, 4'
-                            }).addTo(map);
-
-                            // Reference style teal and orange dots
-                            const markers = [
-                                { lat: -7.1330, lng: 112.6000, color: '#00c9a7' },
-                                { lat: -7.1310, lng: 112.6030, color: '#00c9a7' },
-                                { lat: -7.1325, lng: 112.6050, color: '#00c9a7' },
-                                { lat: -7.1370, lng: 112.6010, color: '#ff5722' },
-                                { lat: -7.1390, lng: 112.6040, color: '#00c9a7' },
-                                { lat: -7.1400, lng: 112.6070, color: '#00c9a7' },
-                                { lat: -7.1345, lng: 112.6065, color: '#00c9a7' },
-                                { lat: -7.1365, lng: 112.5990, color: '#00c9a7' },
-                            ];
-
-                            markers.forEach(m => {
-                                const dotIcon = L.divIcon({
-                                    className: 'custom-dot',
-                                    html: `<div style='background-color: ${m.color}; width: 10px; height: 10px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.3);'></div>`,
-                                    iconSize: [10, 10],
-                                    iconAnchor: [5, 5]
-                                });
-                                L.marker([m.lat, m.lng], { icon: dotIcon }).addTo(map);
-                            });
-                        }
-                    }"
                 ></div>
 
+                <!-- TOMBOL PULIHKAN KARTU JIKA DITUTUP -->
+                <button 
+                    type="button" 
+                    @click="cardInspection = true; cardRoutine = true" 
+                    x-show="!cardInspection || !cardRoutine" 
+                    class="absolute top-3 left-14 z-10 px-2.5 py-1 bg-white/95 hover:bg-white text-slate-700 text-[11px] font-bold rounded-lg shadow-md border border-slate-200 flex items-center gap-1.5 transition-all cursor-pointer select-none"
+                    title="Buka kembali kartu informasi"
+                >
+                    <svg class="w-3.5 h-3.5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Tampilkan Kartu Info</span>
+                </button>
+
                 <!-- FLOATING OVERLAY CARD 1: LIVE INSPECTION (TOP-RIGHT ON MAP) -->
-                <div class="absolute top-4 right-4 z-10 w-80 bg-white rounded-xl border border-[#00c9a7] shadow-xl p-3 text-xs space-y-2 select-none" x-data="{ open: true }" x-show="open">
+                <div 
+                    class="absolute top-3 right-3 z-10 w-80 bg-white/95 backdrop-blur-xs rounded-xl border border-[#00c9a7] shadow-xl p-3 text-xs space-y-2 select-none transition-all" 
+                    x-show="cardInspection" 
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                >
                     <div class="flex items-start justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="px-1.5 py-0.5 bg-[#00c9a7] text-white font-extrabold text-[10px] rounded uppercase">LIVE</span>
-                            <span class="px-1.5 py-0.5 bg-cyan-500 text-white font-bold text-[10px] rounded uppercase">INS</span>
-                            <span class="px-1.5 py-0.5 bg-slate-100 text-slate-700 font-bold text-[10px] rounded uppercase">IN PROGRESS</span>
-                        </div>
                         <div class="flex items-center gap-1.5">
-                            <div class="w-5 h-5 rounded-full bg-slate-200 overflow-hidden">
+                            <span class="px-1.5 py-0.5 bg-[#00c9a7] text-white font-extrabold text-[10px] rounded uppercase">TERVERIFIKASI</span>
+                            <span class="px-1.5 py-0.5 bg-cyan-500 text-white font-bold text-[10px] rounded uppercase">INSPEKSI</span>
+                            <span class="px-1.5 py-0.5 bg-slate-100 text-slate-700 font-bold text-[10px] rounded uppercase">DALAM PROSES</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-5 h-5 rounded-full bg-slate-200 overflow-hidden shrink-0">
                                 <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar" class="w-full h-full object-cover"/>
                             </div>
-                            <button @click="open = false" class="text-slate-400 hover:text-slate-600">
-                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            <button 
+                                type="button" 
+                                @click="cardInspection = false" 
+                                class="w-5 h-5 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shrink-0" 
+                                title="Tutup Kartu Ini"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
                     </div>
@@ -188,26 +169,40 @@
                     </div>
 
                     <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100">
-                        <span>ID: 1850</span>
-                        <a href="{{ route('assets.show', 'gedung-serbaguna-desa-sukomulyo') }}" class="font-bold text-teal-600 hover:underline">Detail Aset &rarr;</a>
+                        <span>ID Aset: 1850</span>
+                        <a href="{{ route('assets.show', 'gedung-serbaguna-desa-sukomulyo') }}" class="font-bold text-teal-700 hover:underline">Detail Aset &rarr;</a>
                     </div>
                 </div>
 
-                <!-- FLOATING OVERLAY CARD 2: LIVE ROUTINE PROGRESS (CENTER-LEFT ON MAP) -->
-                <div class="absolute bottom-4 right-8 z-10 w-84 bg-white rounded-xl border border-blue-500 shadow-xl p-3 text-xs space-y-2 select-none" x-data="{ open: true }" x-show="open">
+                <!-- FLOATING OVERLAY CARD 2: LIVE ROUTINE PROGRESS (BOTTOM-RIGHT ON MAP) -->
+                <div 
+                    class="absolute bottom-3 right-3 z-10 w-80 bg-white/95 backdrop-blur-xs rounded-xl border border-blue-500 shadow-xl p-3 text-xs space-y-2 select-none transition-all" 
+                    x-show="cardRoutine" 
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                >
                     <div class="flex items-start justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="px-1.5 py-0.5 bg-blue-600 text-white font-extrabold text-[10px] rounded uppercase">ROUTINE</span>
-                            <span class="px-1.5 py-0.5 bg-slate-100 text-slate-700 font-bold text-[10px] rounded uppercase">TO DO</span>
-                        </div>
                         <div class="flex items-center gap-1.5">
-                            <div class="flex -space-x-1.5">
+                            <span class="px-1.5 py-0.5 bg-blue-600 text-white font-extrabold text-[10px] rounded uppercase">PROGRAM KERJA</span>
+                            <span class="px-1.5 py-0.5 bg-slate-100 text-slate-700 font-bold text-[10px] rounded uppercase">TERJADWAL</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="flex -space-x-1.5 shrink-0">
                                 <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80" class="w-5 h-5 rounded-full border border-white object-cover" />
                                 <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&q=80" class="w-5 h-5 rounded-full border border-white object-cover" />
                                 <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold flex items-center justify-center border border-white">+3</span>
                             </div>
-                            <button @click="open = false" class="text-slate-400 hover:text-slate-600 ml-1">
-                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            <button 
+                                type="button" 
+                                @click="cardRoutine = false" 
+                                class="w-5 h-5 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shrink-0" 
+                                title="Tutup Kartu Ini"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
                     </div>
@@ -215,16 +210,16 @@
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-700 font-extrabold flex flex-col items-center justify-center shrink-0 border border-blue-100">
                             <span class="text-xs leading-none">45%</span>
-                            <span class="text-[8px] text-blue-500 font-normal">COMPLETE</span>
+                            <span class="text-[8px] text-blue-500 font-normal">PROGRES</span>
                         </div>
                         <div class="overflow-hidden">
                             <h4 class="font-bold text-slate-900 truncate">Revitalisasi Sentra UMKM BUMDes</h4>
-                            <p class="text-[11px] text-slate-500">14 Jobs &bull; Target: Nov 2026</p>
+                            <p class="text-[11px] text-slate-500">14 Pekerjaan &bull; Target: Nov 2026</p>
                         </div>
                     </div>
 
                     <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100">
-                        <span class="text-blue-600 font-bold">LIVE 05:11</span>
+                        <span class="text-blue-600 font-bold">PANTAU LANGSUNG</span>
                         <span>ID: 1427</span>
                     </div>
                 </div>
@@ -245,21 +240,23 @@
 
                     <div class="flex items-center gap-2 shrink-0">
                         <a 
-                            href="{{ route('reports.kib_a', $village->id ?? 1) }}" 
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs border border-amber-200 shadow-xs transition-colors"
+                            href="{{ route('reports.sipades', ['villageId' => $village->id ?? 1]) }}" 
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs border border-amber-200 shadow-xs transition-colors whitespace-nowrap"
                         >
-                            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-                            <span>Buku Inventaris (KIB A)</span>
+                            <i data-lucide="file-stack" class="w-3.5 h-3.5"></i>
+                            <span>Laporan SIPADES</span>
                         </a>
 
-                        <button 
-                            type="button" 
-                            wire:click="openCreateAssetModal" 
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-xs transition-colors"
-                        >
-                            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                            <span>+ Tambah Aset Desa</span>
-                        </button>
+                        @if(!auth()->user()?->isDistrictAdmin())
+                            <button 
+                                type="button" 
+                                wire:click="openCreateAssetModal" 
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-xs transition-colors whitespace-nowrap"
+                            >
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                                <span>+ Tambah Aset Desa</span>
+                            </button>
+                        @endif
                     </div>
                 </div>
 
@@ -269,11 +266,11 @@
                         <!-- Reference Soft Teal Table Header -->
                         <thead class="bg-[#80cbc4]/70 text-slate-800 font-extrabold text-[11px] uppercase tracking-wider">
                             <tr>
-                                <th class="py-2.5 px-4 font-extrabold">NAMA ASET</th>
-                                <th class="py-2.5 px-4 font-extrabold">KATEGORI</th>
-                                <th class="py-2.5 px-4 font-extrabold">KONDISI</th>
-                                <th class="py-2.5 px-4 font-extrabold">SKOR AI</th>
-                                <th class="py-2.5 px-4 font-extrabold text-right">AKSI PEMDES</th>
+                                <th class="py-2.5 px-4 font-extrabold whitespace-nowrap">NAMA ASET</th>
+                                <th class="py-2.5 px-4 font-extrabold whitespace-nowrap">KATEGORI</th>
+                                <th class="py-2.5 px-4 font-extrabold whitespace-nowrap">KONDISI</th>
+                                <th class="py-2.5 px-4 font-extrabold whitespace-nowrap">SKOR AI</th>
+                                <th class="py-2.5 px-4 font-extrabold text-right whitespace-nowrap">{{ auth()->user()?->isDistrictAdmin() ? 'STATUS' : 'AKSI PEMDES' }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-slate-700">
@@ -301,24 +298,31 @@
                                     <td class="py-3 px-4 text-teal-800 font-extrabold text-xs">
                                         {{ $a->potential_score ?? 85 }}/100
                                     </td>
-                                    <td class="py-3 px-4 text-right space-x-1">
-                                        <button 
-                                            type="button" 
-                                            wire:click="editAsset({{ $a->id }})" 
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold text-[11px] border border-teal-200 transition-colors"
-                                        >
-                                            <i data-lucide="edit-2" class="w-3 h-3"></i>
-                                            <span>Ubah</span>
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            wire:click="deleteAsset({{ $a->id }})" 
-                                            wire:confirm="Yakin ingin menghapus aset desa ini?" 
-                                            class="inline-flex items-center p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                                            title="Hapus Aset"
-                                        >
-                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                        </button>
+                                    <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
+                                        @if(auth()->user()?->isDistrictAdmin())
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-50 text-sky-700 text-[10px] font-bold border border-sky-200">
+                                                <i data-lucide="eye" class="w-3 h-3 text-sky-600"></i>
+                                                <span>Pengawasan</span>
+                                            </span>
+                                        @else
+                                            <button 
+                                                type="button" 
+                                                wire:click="editAsset({{ $a->id }})" 
+                                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold text-[11px] border border-teal-200 transition-colors"
+                                            >
+                                                <i data-lucide="edit-2" class="w-3 h-3"></i>
+                                                <span>Ubah</span>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                wire:click="deleteAsset({{ $a->id }})" 
+                                                wire:confirm="Yakin ingin menghapus aset desa ini?" 
+                                                class="inline-flex items-center p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                                title="Hapus Aset"
+                                            >
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                            </button>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
@@ -397,9 +401,38 @@
                             </div>
                         </div>
 
+                        <!-- PETA PEMILIHAN LOKASI ASET INTERAKTIF -->
+                        <div class="space-y-1.5 pt-1" x-data="modalAssetPicker({
+                            lat: {{ (float) ($assetLatitude ?? ($village?->latitude ?? -7.1350)) }},
+                            lng: {{ (float) ($assetLongitude ?? ($village?->longitude ?? 112.6020)) }}
+                        })">
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="font-semibold text-slate-700 flex items-center gap-1.5">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-teal-600"></i>
+                                    <span>Pilih Titik Lokasi Aset di Peta *</span>
+                                </label>
+                                <button type="button" @click="useGPS()" class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-2.5 py-1 rounded-lg border border-teal-200 transition-colors cursor-pointer">
+                                    <span>📍 Lokasi GPS Saya</span>
+                                </button>
+                            </div>
+
+                            <div class="relative w-full h-48 rounded-xl border border-slate-200 overflow-hidden bg-slate-100 shadow-inner">
+                                <div x-ref="modalMapContainer" wire:ignore class="w-full h-full z-0"></div>
+                                <div class="absolute bottom-2 left-2 z-10 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-md text-[10px] font-semibold text-slate-700 shadow border border-slate-200 pointer-events-none">
+                                    Klik di peta atau geser pin 📍 untuk menentukan posisi aset
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-200 text-slate-600">
+                                <span>Lat: <strong class="text-teal-800" x-text="lat"></strong></span>
+                                <span>Lng: <strong class="text-teal-800" x-text="lng"></strong></span>
+                                <span class="text-[10px] text-slate-400">Otomatis sinkron</span>
+                            </div>
+                        </div>
+
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Alamat / Patokan Lokasi</label>
-                            <input type="text" wire:model="assetAddress" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs" placeholder="Contoh: Jl. Sukomulyo Barat No. 12" />
+                            <label class="block font-semibold text-slate-700 mb-1">Alamat / Patokan Lokasi Lengkap</label>
+                            <input type="text" wire:model="assetAddress" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs focus:ring-2 focus:ring-teal-500" placeholder="Contoh: Jl. Sukomulyo Barat No. 12, RT 02 RW 01" />
                         </div>
 
                         <div>
@@ -425,102 +458,102 @@
             
             <!-- 1. ASSET CATEGORIES HORIZONTAL BARS -->
             <div class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs space-y-3">
-                <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">ASSET CATEGORIES</h3>
+                <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">KATEGORI ASET DESA</h3>
                 
                 <div class="space-y-2 text-xs">
                     <!-- Category 1 -->
                     <div>
                         <div class="flex justify-between text-[11px] text-slate-600 mb-0.5">
-                            <span class="font-medium">Art & Kebudayaan</span>
+                            <span class="font-medium">Seni & Kebudayaan Desa</span>
                         </div>
                         <div class="w-full bg-slate-100 h-3 rounded">
                             <div class="bg-[#80cbc4] h-full rounded" style="width: 25%"></div>
                         </div>
-                        <span class="text-[10px] text-slate-500">3</span>
+                        <span class="text-[10px] text-slate-500">3 Unit</span>
                     </div>
 
                     <!-- Category 2 -->
                     <div>
                         <div class="flex justify-between text-[11px] text-slate-600 mb-0.5">
-                            <span class="font-medium">Fitness & Olahraga Desa</span>
+                            <span class="font-medium">Fasilitas Olahraga & Rekreasi</span>
                         </div>
                         <div class="w-full bg-slate-100 h-3 rounded">
                             <div class="bg-[#80cbc4] h-full rounded" style="width: 48%"></div>
                         </div>
-                        <span class="text-[10px] text-slate-500">6</span>
+                        <span class="text-[10px] text-slate-500">6 Unit</span>
                     </div>
 
                     <!-- Category 3 -->
                     <div>
                         <div class="flex justify-between text-[11px] text-slate-600 mb-0.5">
-                            <span class="font-medium">Bangunan & Balai Pertemuan</span>
+                            <span class="font-medium">Gedung & Balai Pertemuan</span>
                         </div>
                         <div class="w-full bg-slate-100 h-3 rounded">
                             <div class="bg-[#80cbc4] h-full rounded" style="width: 40%"></div>
                         </div>
-                        <span class="text-[10px] text-slate-500">5</span>
+                        <span class="text-[10px] text-slate-500">5 Unit</span>
                     </div>
 
                     <!-- Category 4 -->
                     <div>
                         <div class="flex justify-between text-[11px] text-slate-600 mb-0.5">
-                            <span class="font-medium">Monuments & Wisata Religi</span>
+                            <span class="font-medium">Monumen & Destinasi Wisata</span>
                         </div>
                         <div class="w-full bg-slate-100 h-3 rounded">
                             <div class="bg-[#80cbc4] h-full rounded" style="width: 40%"></div>
                         </div>
-                        <span class="text-[10px] text-slate-500">5</span>
+                        <span class="text-[10px] text-slate-500">5 Unit</span>
                     </div>
 
                     <!-- Category 5 -->
                     <div>
                         <div class="flex justify-between text-[11px] text-slate-600 mb-0.5">
-                            <span class="font-medium">Play Equipment & Taman Terbuka</span>
+                            <span class="font-medium">Taman Terbuka & Ruang Hijau</span>
                         </div>
                         <div class="w-full bg-slate-100 h-3 rounded">
                             <div class="bg-[#80cbc4] h-full rounded" style="width: 85%"></div>
                         </div>
-                        <span class="text-[10px] text-slate-500">5</span>
+                        <span class="text-[10px] text-slate-500">5 Unit</span>
                     </div>
 
                     <!-- Category 6 -->
                     <div>
                         <div class="flex justify-between text-[11px] text-slate-600 mb-0.5">
-                            <span class="font-medium">Security & Pos Pantau</span>
+                            <span class="font-medium">Keamanan & Pos Pantau Desa</span>
                         </div>
                         <div class="w-full bg-slate-100 h-3 rounded">
                             <div class="bg-[#80cbc4] h-full rounded" style="width: 38%"></div>
                         </div>
-                        <span class="text-[10px] text-slate-500">5</span>
+                        <span class="text-[10px] text-slate-500">5 Unit</span>
                     </div>
 
                     <!-- Category 7 -->
                     <div>
                         <div class="flex justify-between text-[11px] text-slate-600 mb-0.5">
-                            <span class="font-medium">Signage & Kios Usaha</span>
+                            <span class="font-medium">Kios Usaha & Sentra UMKM</span>
                         </div>
                         <div class="w-full bg-slate-100 h-3 rounded">
                             <div class="bg-[#80cbc4] h-full rounded" style="width: 65%"></div>
                         </div>
-                        <span class="text-[10px] text-slate-500">5</span>
+                        <span class="text-[10px] text-slate-500">5 Unit</span>
                     </div>
 
                     <!-- Category 8 -->
                     <div>
                         <div class="flex justify-between text-[11px] text-slate-600 mb-0.5">
-                            <span class="font-medium">Sports Facilities</span>
+                            <span class="font-medium">Sarana Olahraga Publik</span>
                         </div>
                         <div class="w-full bg-slate-100 h-3 rounded">
                             <div class="bg-[#80cbc4] h-full rounded" style="width: 38%"></div>
                         </div>
-                        <span class="text-[10px] text-slate-500">5</span>
+                        <span class="text-[10px] text-slate-500">5 Unit</span>
                     </div>
                 </div>
             </div>
 
             <!-- 2. TOTAL INSURANCE VALUE BREAKDOWN (DONUT CHART) -->
             <div class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs space-y-3">
-                <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">TOTAL INSURANCE VALUE BREAKDOWN</h3>
+                <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">KOMPOSISI VALUASI ASET</h3>
                 
                 <div 
                     class="flex items-center justify-between"
@@ -530,7 +563,7 @@
                                 series: [65, 35],
                                 chart: { type: 'donut', height: 160, sparkline: { enabled: true } },
                                 colors: ['#00c9a7', '#008080'],
-                                labels: ['LAND & PROPERTY', 'INFRASTRUCTURE & AMENITIES'],
+                                labels: ['TANAH & PROPERTI', 'SARANA & PRASARANA'],
                                 plotOptions: {
                                     pie: {
                                         donut: {
@@ -551,11 +584,11 @@
                     <div class="space-y-2 text-[10px] font-bold text-slate-700">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-[#00c9a7] shrink-0"></span>
-                            <span>LAND & PROPERTY</span>
+                            <span>TANAH & PROPERTI</span>
                         </div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-[#008080] shrink-0"></span>
-                            <span>INFRASTRUCTURE & AMENITIES</span>
+                            <span>SARANA & PRASARANA</span>
                         </div>
                     </div>
                 </div>
@@ -563,7 +596,7 @@
 
             <!-- 3. ASSET CONDITION (DONUT CHART) -->
             <div class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs space-y-3">
-                <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">ASSET CONDITION</h3>
+                <h3 class="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">STATUS KONDISI ASET</h3>
                 
                 <div 
                     class="flex items-center justify-between"
@@ -573,7 +606,7 @@
                                 series: [45, 15, 20, 20],
                                 chart: { type: 'donut', height: 160, sparkline: { enabled: true } },
                                 colors: ['#008080', '#ff5722', '#00c9a7', '#60a5fa'],
-                                labels: ['GOOD', 'POOR', 'NEW', 'FAIR'],
+                                labels: ['BAIK / PRODUKTIF', 'RUSAK / TERLANTAR', 'BARU TERDATA', 'KURANG PRODUKTIF'],
                                 plotOptions: {
                                     pie: {
                                         donut: {
@@ -594,19 +627,19 @@
                     <div class="grid grid-cols-1 gap-1.5 text-[10px] font-bold text-slate-700">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-[#008080] shrink-0"></span>
-                            <span>GOOD</span>
+                            <span>BAIK / PRODUKTIF</span>
                         </div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-[#ff5722] shrink-0"></span>
-                            <span>POOR</span>
+                            <span>RUSAK / TERLANTAR</span>
                         </div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-[#60a5fa] shrink-0"></span>
-                            <span>NEW</span>
+                            <span>BARU TERDATA</span>
                         </div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-[#00c9a7] shrink-0"></span>
-                            <span>FAIR</span>
+                            <span>KURANG PRODUKTIF</span>
                         </div>
                     </div>
                 </div>

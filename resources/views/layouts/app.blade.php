@@ -113,20 +113,20 @@
 
                 <!-- Desktop Navigation Menu -->
                 <nav class="hidden md:flex items-center gap-1 text-xs font-semibold text-slate-600">
-                    <a href="{{ route('home') }}" class="px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('home') ? 'bg-slate-100 text-slate-900 font-bold' : 'hover:bg-slate-50 hover:text-slate-900' }}">
+                    <a href="{{ route('home') }}" class="whitespace-nowrap px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('home') ? 'bg-slate-100 text-slate-900 font-bold' : 'hover:bg-slate-50 hover:text-slate-900' }}">
                         Beranda
                     </a>
-                    <a href="{{ route('explore') }}" class="px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('explore') ? 'bg-slate-100 text-slate-900 font-bold' : 'hover:bg-slate-50 hover:text-slate-900' }}">
+                    <a href="{{ route('explore') }}" class="whitespace-nowrap px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('explore') ? 'bg-slate-100 text-slate-900 font-bold' : 'hover:bg-slate-50 hover:text-slate-900' }}">
                         Jelajahi Aset
                     </a>
-                    <a href="{{ route('map') }}" class="px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('map') ? 'bg-slate-100 text-slate-900 font-bold' : 'hover:bg-slate-50 hover:text-slate-900' }}">
+                    <a href="{{ route('map') }}" class="whitespace-nowrap px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('map') ? 'bg-slate-100 text-slate-900 font-bold' : 'hover:bg-slate-50 hover:text-slate-900' }}">
                         Peta Spasial GIS
                     </a>
-                    <a href="{{ route('reports.villages') }}" class="px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('reports.villages') ? 'bg-slate-100 text-slate-900 font-bold' : 'hover:bg-slate-50 hover:text-slate-900' }}">
+                    <a href="{{ route('reports.villages') }}" class="whitespace-nowrap px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('reports.villages') ? 'bg-slate-100 text-slate-900 font-bold' : 'hover:bg-slate-50 hover:text-slate-900' }}">
                         Laporan per Desa
                     </a>
                     @if(auth()->check() && !auth()->user()->isCommunity())
-                        <a href="{{ auth()->user()->isVillageAdmin() ? route('dashboard.village') : (auth()->user()->isDistrictAdmin() ? route('dashboard.district') : route('dashboard.regency')) }}" class="px-3 py-2 rounded-lg text-teal-700 bg-teal-50 hover:bg-teal-100 font-bold">
+                        <a href="{{ auth()->user()->isVillageAdmin() ? route('dashboard.village') : (auth()->user()->isDistrictAdmin() ? route('dashboard.district') : route('dashboard.regency')) }}" class="whitespace-nowrap px-3 py-2 rounded-lg text-teal-700 bg-teal-50 hover:bg-teal-100 font-bold">
                             Command Center &rarr;
                         </a>
                     @endif

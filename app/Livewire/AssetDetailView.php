@@ -185,6 +185,6 @@ class AssetDetailView extends Component
         $comments = $this->asset->comments()->with('user')->latest()->get();
 
         return view('livewire.asset-detail-view', compact('ideas', 'comments'))
-            ->layout('layouts.app', ['title' => $this->asset->name]);
+            ->layout('layouts.admin', ['title' => $this->asset->name]);
     }
 }

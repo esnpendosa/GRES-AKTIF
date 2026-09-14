@@ -42,22 +42,48 @@ class ReportWizard extends Component
     public string $title = '';
     public string $description = '';
 
+    // AI Quick Report Assistant
+    public string $aiPrompt = '';
+    public bool $isAiProcessing = false;
+    public ?string $aiMessage = null;
+
     public bool $isSubmitted = false;
     public ?AssetReport $createdReport = null;
 
     public function mount()
     {
-        $firstVillage = Village::first();
-        if ($firstVillage) {
-            $this->village_id = $firstVillage->id;
-            $this->district_id = $firstVillage->district_id;
-            $this->latitude = (float)$firstVillage->latitude;
-            $this->longitude = (float)$firstVillage->longitude;
+        $user = Auth::user();
+        if ($user && $user->village_id && $user->village) {
+            $this->village_id = $user->village_id;
+            $this->district_id = $user->village->district_id;
+            $this->latitude = (float)($user->village->latitude ?? -7.1350);
+            $this->longitude = (float)($user->village->longitude ?? 112.6020);
+            $this->address = "Desa {$user->village->name}, Kec. " . ($user->village->district?->name ?? 'Manyar') . ", Gresik";
+        } else {
+            $firstVillage = Village::with('district')->first();
+            if ($firstVillage) {
+                $this->village_id = $firstVillage->id;
+                $this->district_id = $firstVillage->district_id;
+                $this->latitude = (float)$firstVillage->latitude;
+                $this->longitude = (float)$firstVillage->longitude;
+                $this->address = "Desa {$firstVillage->name}, Kec. " . ($firstVillage->district?->name ?? 'Manyar') . ", Gresik";
+            }
         }
 
         $firstCategory = AssetCategory::first();
         if ($firstCategory) {
             $this->category_id = $firstCategory->id;
+        }
+    }
+
+    public function updatedVillageId($value)
+    {
+        $v = Village::find($value);
+        if ($v) {
+            $this->district_id = $v->district_id;
+            $this->latitude = (float)$v->latitude;
+            $this->longitude = (float)$v->longitude;
+            $this->address = "Desa {$v->name}, Kecamatan Manyar, Gresik";
         }
     }
 
@@ -96,20 +122,63 @@ class ReportWizard extends Component
 
     public function setLocation($lat, $lng, $address = null)
     {
-        $this->latitude = (float)$lat;
-        $this->longitude = (float)$lng;
-        if ($address) {
-            $this->address = $address;
-        }
+        $this->latitude = round((float)$lat, 6);
+        $this->longitude = round((float)$lng, 6);
 
-        // Find nearest village
-        $nearestVillage = Village::all()->sortBy(function ($v) use ($lat, $lng) {
-            return pow($v->latitude - $lat, 2) + pow($v->longitude - $lng, 2);
+        // Find nearest village from database with district
+        $nearestVillage = Village::with('district')->get()->sortBy(function ($v) use ($lat, $lng) {
+            $dLat = (float)($v->latitude ?? -7.1350) - (float)$lat;
+            $dLng = (float)($v->longitude ?? 112.6020) - (float)$lng;
+            return ($dLat * $dLat) + ($dLng * $dLng);
         })->first();
 
         if ($nearestVillage) {
             $this->village_id = $nearestVillage->id;
             $this->district_id = $nearestVillage->district_id;
+            $districtName = $nearestVillage->district?->name ?? 'Manyar';
+            if ($address) {
+                $this->address = $address;
+            } else {
+                $this->address = "Desa {$nearestVillage->name}, Kec. {$districtName}, Gresik (Titik GPS: {$this->latitude}, {$this->longitude})";
+            }
+        } elseif ($address) {
+            $this->address = $address;
+        }
+    }
+
+    public function fillWithAi()
+    {
+        $prompt = trim($this->aiPrompt);
+        if (empty($prompt)) {
+            $this->addError('aiPrompt', 'Silakan ketik deskripsi aset yang ingin dilaporkan.');
+            return;
+        }
+
+        $this->isAiProcessing = true;
+        $this->resetErrorBag('aiPrompt');
+
+        try {
+            $openRouter = app(\App\Services\Ai\OpenRouterAiService::class);
+            $parsed = $openRouter->parseAssetReportFromText($prompt);
+
+            if (!empty($parsed)) {
+                $this->title = $parsed['title'];
+                $this->description = $parsed['description'];
+                $this->condition = $parsed['condition'];
+                $this->suggested_use = $parsed['suggested_use'];
+                $this->category_id = $parsed['category_id'] ?? $this->category_id;
+                $this->village_id = $parsed['village_id'] ?? $this->village_id;
+                $this->district_id = $parsed['district_id'] ?? $this->district_id;
+                $villageObj = $this->village_id ? Village::find($this->village_id) : null;
+                $this->address = !empty($parsed['address']) ? $parsed['address'] : ($villageObj ? "Desa {$villageObj->name}, Kecamatan Manyar, Gresik" : 'Desa Sukomulyo, Kecamatan Manyar, Gresik');
+
+                $this->aiMessage = "Data aset berhasil diekstrak oleh AI! Silakan tinjau ringkasan di bawah dan klik Kirim.";
+                $this->currentStep = 6; // Jump directly to Review & Submit step
+            }
+        } catch (\Throwable $e) {
+            $this->addError('aiPrompt', 'Gagal memproses dengan AI: ' . $e->getMessage());
+        } finally {
+            $this->isAiProcessing = false;
         }
     }
 
@@ -157,11 +226,12 @@ class ReportWizard extends Component
             'status' => 'pending',
         ]);
 
-        // Award +20 gamification points
-        GamificationService::awardPoints($user, 20, 'Melaporkan aset desa baru', 'AssetReport', $report->id);
 
         // Audit Log
         AuditLogger::log('created', 'AssetReport', $report->id, null, $report->toArray());
+
+        // Send email notification to admin
+        \App\Services\EmailNotificationService::sendNewAssetReport($report->load(['village', 'user', 'category']), 'Form Laporan Warga');
 
         $this->createdReport = $report;
         $this->isSubmitted = true;
@@ -181,6 +251,6 @@ class ReportWizard extends Component
         $villages = $this->district_id ? Village::where('district_id', $this->district_id)->get() : Village::all();
 
         return view('livewire.report-wizard', compact('categories', 'districts', 'villages'))
-            ->layout('layouts.app', ['title' => 'Laporkan Aset Desa']);
+            ->layout('layouts.admin', ['title' => 'Laporkan Aset Desa']);
     }
 }

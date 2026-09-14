@@ -328,50 +328,50 @@
 
     </div>
 
-</div>
+    <!-- PRINT STYLING FOR PERFECT 2-PAGE LANDSCAPE EXPORT -->
+    <style>
+    @media print {
+        @page {
+            size: landscape;
+            margin: 6mm 8mm;
+        }
+        html, body {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            font-family: Arial, Helvetica, sans-serif !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        header, footer, nav, .print\:hidden {
+            display: none !important;
+        }
+        .page-sheet {
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            max-width: none !important;
+            min-height: 98vh !important;
+            page-break-inside: avoid !important;
+        }
+        .page-break {
+            page-break-after: always !important;
+            break-after: page !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        table {
+            border-collapse: collapse !important;
+            width: 100% !important;
+        }
+        th, td {
+            border: 1px solid #000000 !important;
+            color: #000000 !important;
+        }
+    }
+    </style>
 
-<!-- PRINT STYLING FOR PERFECT 2-PAGE LANDSCAPE EXPORT -->
-<style>
-@media print {
-    @page {
-        size: landscape;
-        margin: 6mm 8mm;
-    }
-    html, body {
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        font-family: Arial, Helvetica, sans-serif !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    header, footer, nav, .print\:hidden {
-        display: none !important;
-    }
-    .page-sheet {
-        box-shadow: none !important;
-        border: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        width: 100% !important;
-        max-width: none !important;
-        min-height: 98vh !important;
-        page-break-inside: avoid !important;
-    }
-    .page-break {
-        page-break-after: always !important;
-        break-after: page !important;
-        height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    table {
-        border-collapse: collapse !important;
-        width: 100% !important;
-    }
-    th, td {
-        border: 1px solid #000000 !important;
-        color: #000000 !important;
-    }
-}
-</style>
+</div>

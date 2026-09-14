@@ -30,6 +30,8 @@ class VillageDashboard extends Component
     public string $assetAddress = '';
     public string $assetStatus = 'verified';
     public string $assetDescription = '';
+    public ?float $assetLatitude = null;
+    public ?float $assetLongitude = null;
 
     public function mount()
     {
@@ -49,14 +51,38 @@ class VillageDashboard extends Component
 
     public function openCreateAssetModal()
     {
-        $this->reset(['editingAssetId', 'assetName', 'assetDescription', 'assetAddress']);
+        $this->reset(['editingAssetId', 'assetName', 'assetDescription', 'assetAddress', 'assetLatitude', 'assetLongitude']);
         $this->assetCondition = 'tidak_digunakan';
         $this->assetTargetUse = 'Sentra UMKM';
         $this->assetArea = 350;
         $this->assetStatus = 'verified';
         $firstCat = AssetCategory::first();
         $this->assetCategoryId = $firstCat ? $firstCat->id : 1;
+        $this->assetLatitude = (float) ($this->village->latitude ?? -7.1350);
+        $this->assetLongitude = (float) ($this->village->longitude ?? 112.6020);
+        $this->assetAddress = "Desa " . ($this->village?->name ?? 'Sukomulyo') . ", Manyar, Gresik";
         $this->showAssetModal = true;
+    }
+
+    public function openCreateAssetModalWithCoords(?float $lat = null, ?float $lng = null): void
+    {
+        $this->openCreateAssetModal();
+        if ($lat && $lng) {
+            $this->assetLatitude = round($lat, 6);
+            $this->assetLongitude = round($lng, 6);
+            $this->assetAddress = "Desa " . ($this->village?->name ?? 'Sukomulyo') . " (Titik Peta: {$this->assetLatitude}, {$this->assetLongitude})";
+        }
+    }
+
+    public function setLocation(float $lat, float $lng, ?string $address = null): void
+    {
+        $this->assetLatitude = round($lat, 6);
+        $this->assetLongitude = round($lng, 6);
+        if ($address) {
+            $this->assetAddress = $address;
+        } elseif (empty($this->assetAddress) || str_contains($this->assetAddress, 'Titik Peta')) {
+            $this->assetAddress = "Desa " . ($this->village?->name ?? 'Sukomulyo') . " (Titik Peta: {$this->assetLatitude}, {$this->assetLongitude})";
+        }
     }
 
     public function editAsset(int $assetId)
@@ -73,11 +99,20 @@ class VillageDashboard extends Component
         $this->assetAddress = $asset->address ?? '';
         $this->assetStatus = $asset->status;
         $this->assetDescription = $asset->description ?? '';
+        $this->assetLatitude  = $asset->latitude  ? (float) $asset->latitude  : null;
+        $this->assetLongitude = $asset->longitude ? (float) $asset->longitude : null;
         $this->showAssetModal = true;
     }
 
     public function saveAsset()
     {
+        $user = Auth::user();
+        if ($user && $user->isDistrictAdmin()) {
+            session()->flash('error', 'Akses Ditolak: Akun Pemerintah Kecamatan berstatus Pengawas (Hanya Pantau/Lihat).');
+            $this->showAssetModal = false;
+            return;
+        }
+
         $this->validate([
             'assetName' => 'required|string|min:3|max:255',
             'assetCategoryId' => 'required|exists:asset_categories,id',
@@ -87,7 +122,6 @@ class VillageDashboard extends Component
         ]);
 
         $villageId = $this->village ? $this->village->id : 1;
-        $user = Auth::user();
 
         if ($this->editingAssetId) {
             // Scoped update
@@ -120,8 +154,8 @@ class VillageDashboard extends Component
                 'status' => $this->assetStatus,
                 'ownership_type' => 'Pemerintah Desa',
                 'area' => $this->assetArea,
-                'latitude' => $this->village->latitude ?? -7.1350,
-                'longitude' => $this->village->longitude ?? 112.6020,
+                'latitude'  => $this->assetLatitude  ?? ($this->village->latitude  ?? -7.1350),
+                'longitude' => $this->assetLongitude ?? ($this->village->longitude ?? 112.6020),
                 'address' => $this->assetAddress ?: "Desa {$this->village->name}, Gresik",
                 'target_activation_use' => $this->assetTargetUse,
                 'verified_at' => now(),
@@ -141,10 +175,17 @@ class VillageDashboard extends Component
         }
 
         $this->showAssetModal = false;
+        $this->dispatch('asset-saved');
     }
 
     public function deleteAsset(int $assetId)
     {
+        $user = Auth::user();
+        if ($user && $user->isDistrictAdmin()) {
+            session()->flash('error', 'Akses Ditolak: Akun Pemerintah Kecamatan berstatus Pengawas (Hanya Pantau/Lihat).');
+            return;
+        }
+
         $villageId = $this->village ? $this->village->id : 1;
         $asset = Asset::where('village_id', $villageId)->findOrFail($assetId);
         $name = $asset->name;

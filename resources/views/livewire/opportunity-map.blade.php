@@ -1,119 +1,45 @@
-<div 
-    class="h-[calc(100vh-4rem)] flex flex-col md:flex-row overflow-hidden relative" 
-    x-data="{
-        map: null,
-        markersLayer: null,
-        activeAsset: null,
-        filterDrawerOpen: false,
-        assets: @js($assetsPayload),
-        
-        init() {
-            this.initMap();
-            
-            // Listen to Livewire filter updates
-            $wire.on('assets-updated', (data) => {
-                this.assets = data.assets || [];
-                this.renderMarkers();
-            });
-        },
-
-        initMap() {
-            if (this.map) return;
-            
-            // Initialize Leaflet with zoom control at bottomleft to avoid topbar overlap
-            this.map = L.map('opportunityMapContainer', {
-                zoomControl: false,
-                attributionControl: false
-            }).setView([-7.1566, 112.6555], 12);
-
-            // Add Zoom Control at bottomleft
-            L.control.zoom({ position: 'bottomleft' }).addTo(this.map);
-
-            // Satellite Hybrid + Standard Street Map
-            const googleEarth = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-                maxZoom: 20,
-                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-            }).addTo(this.map);
-
-            const streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19
-            });
-
-            L.control.layers({
-                'Citra Satelit': googleEarth,
-                'Peta Jalan': streetMap
-            }, null, { position: 'topright' }).addTo(this.map);
-
-            this.markersLayer = L.markerClusterGroup({
-                maxClusterRadius: 40,
-                spiderfyOnMaxZoom: true,
-                showCoverageOnHover: false,
-                zoomToBoundsOnClick: true
-            });
-
-            this.map.addLayer(this.markersLayer);
-            this.renderMarkers();
-
-            // Check if redirected from a fresh report
-            @if($focusLat && $focusLng)
-                this.map.setView([{{ $focusLat }}, {{ $focusLng }}], 16);
-                const pulseIcon = L.divIcon({
-                    className: 'new-report-pulse',
-                    html: `<div style='background-color: #00c9a7; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 15px #00c9a7; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 800; animation: bounce 1s infinite;'>•</div>`,
-                    iconSize: [28, 28],
-                    iconAnchor: [14, 14]
-                });
-                L.marker([{{ $focusLat }}, {{ $focusLng }}], { icon: pulseIcon }).addTo(this.map);
-            @endif
-
-            // Deselect asset when clicking on empty map area
-            this.map.on('click', () => {
-                this.activeAsset = null;
-            });
-            
-            // If first asset exists, select it as default inspector
-            if (this.assets && this.assets.length > 0) {
-                this.activeAsset = this.assets[0];
-            }
-        },
-
-        renderMarkers() {
-            if (!this.markersLayer) return;
-            this.markersLayer.clearLayers();
-
-            const items = this.assets || [];
-            items.forEach(asset => {
-                const customIcon = L.divIcon({
-                    className: 'custom-div-icon',
-                    html: `<div style='background-color: ${asset.color || '#008080'}; width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 800; cursor: pointer;'>${asset.score}</div>`,
-                    iconSize: [28, 28],
-                    iconAnchor: [14, 14]
-                });
-
-                const marker = L.marker([asset.lat, asset.lng], { icon: customIcon });
-
-                marker.on('click', (e) => {
-                    if (e && e.originalEvent) {
-                        e.originalEvent.stopPropagation();
-                    }
-                    this.activeAsset = asset;
-                    if (window.innerWidth < 768) {
-                        this.map.panTo([asset.lat, asset.lng]);
-                    }
-                    setTimeout(() => {
-                        if (window.lucide) window.lucide.createIcons();
-                    }, 40);
-                });
-
-                this.markersLayer.addLayer(marker);
-            });
-        }
-    }"
-    wire:ignore.self
->
+<div>
+    <div 
+        class="h-[calc(100vh-4rem)] flex flex-col md:flex-row overflow-hidden relative" 
+        x-data="opportunityMapApp({
+            assets: @js($assetsPayload),
+            focusLat: @js($focusLat),
+            focusLng: @js($focusLng),
+            newReportTitle: @js($newReportTitle),
+            newReportVillage: @js($newReportVillage)
+        })"
+        wire:ignore.self
+    >
 
     <!-- Top Sector Filter Bar (Floating Sticky) -->
-    <div class="absolute top-3 left-4 right-16 z-20 pointer-events-none">
+    <div class="absolute top-3 left-4 right-16 z-20 pointer-events-none space-y-2">
+        
+        @if($showNewReportToast)
+            <div 
+                x-data="{ showToast: true }" 
+                x-show="showToast" 
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 -translate-y-2"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                class="max-w-xl mx-auto p-3 bg-slate-900/95 backdrop-blur-md text-white rounded-2xl border border-teal-400/50 shadow-2xl flex items-center justify-between gap-3 pointer-events-auto"
+            >
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </div>
+                    <div class="text-xs">
+                        <p class="font-bold text-white leading-tight">Laporan Anda Telah Terpetakan!</p>
+                        <p class="text-[11px] text-teal-300 leading-tight mt-0.5">
+                            <span class="font-semibold text-white">{{ $newReportTitle ?? 'Aset' }}</span> di {{ $newReportVillage ?? 'Kabupaten Gresik' }}
+                        </p>
+                    </div>
+                </div>
+                <button @click="showToast = false" class="text-slate-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        @endif
+
         <div class="max-w-4xl mx-auto flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden p-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md pointer-events-auto">
             <span class="text-xs font-bold text-slate-800 px-2.5 shrink-0 flex items-center gap-1.5">
                 <i data-lucide="layers" class="w-4 h-4 text-teal-700"></i>
@@ -376,7 +302,7 @@
                             <i data-lucide="check" class="w-5 h-5"></i>
                         </div>
                         <h4 class="font-bold text-sm text-teal-900">Gagasan Berhasil Dikirim!</h4>
-                        <p class="text-xs text-teal-800">Terima kasih atas kontribusi Anda. Anda memperoleh <strong>+10 Poin Warga</strong> dan usulan ini langsung masuk ke radar konsensus publik.</p>
+                        <p class="text-xs text-teal-800">Terima kasih atas kontribusi Anda. Usulan ini langsung masuk ke radar konsensus publik.</p>
                         <button wire:click="$set('showGlobalIdeaModal', false)" class="mt-2 px-5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold transition-colors">
                             Tutup
                         </button>
@@ -417,11 +343,6 @@
                             <textarea wire:model="ideaDescription" rows="3" placeholder="Jelaskan bagaimana ide ini bisa meningkatkan pendapatan warga atau BUMDes..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs"></textarea>
                         </div>
 
-                        <div class="p-3 rounded-xl bg-teal-50 border border-teal-200 text-teal-900 flex items-center justify-between">
-                            <span class="font-medium">Reward Poin Partisipasi:</span>
-                            <span class="font-bold">+10 Poin Warga</span>
-                        </div>
-
                         <div class="flex items-center justify-end gap-2.5 pt-2">
                             <button type="button" wire:click="$set('showGlobalIdeaModal', false)" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">
                                 Batal
@@ -436,4 +357,138 @@
         </div>
     @endif
 
+    </div>
+
+    <script>
+        function opportunityMapApp(config) {
+            return {
+                map: null,
+                markersLayer: null,
+                activeAsset: null,
+                filterDrawerOpen: false,
+                assets: config.assets || [],
+                focusLat: config.focusLat,
+                focusLng: config.focusLng,
+                newReportTitle: config.newReportTitle,
+                newReportVillage: config.newReportVillage,
+                
+                init() {
+                    this.initMap();
+                    
+                    if (this.$wire) {
+                        this.$wire.on('assets-updated', (data) => {
+                            const payload = data[0] || data;
+                            this.assets = payload.assets || [];
+                            this.renderMarkers();
+                        });
+                    }
+                },
+
+                initMap() {
+                    if (this.map) return;
+                    
+                    this.map = L.map('opportunityMapContainer', {
+                        zoomControl: false,
+                        attributionControl: false
+                    }).setView([-7.1566, 112.6555], 12);
+
+                    L.control.zoom({ position: 'bottomleft' }).addTo(this.map);
+
+                    const googleEarth = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                        maxZoom: 20,
+                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+                    }).addTo(this.map);
+
+                    const streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19
+                    });
+
+                    L.control.layers({
+                        'Citra Satelit': googleEarth,
+                        'Peta Jalan': streetMap
+                    }, null, { position: 'topright' }).addTo(this.map);
+
+                    this.markersLayer = L.markerClusterGroup({
+                        maxClusterRadius: 40,
+                        spiderfyOnMaxZoom: true,
+                        showCoverageOnHover: false,
+                        zoomToBoundsOnClick: true
+                    });
+
+                    this.map.addLayer(this.markersLayer);
+                    this.renderMarkers();
+
+                    // Check if redirected from a fresh report
+                    if (this.focusLat && this.focusLng) {
+                        this.map.setView([this.focusLat, this.focusLng], 16);
+                        const pulseIcon = L.divIcon({
+                            className: 'new-report-pulse-container',
+                            html: `
+                                <div class="relative flex items-center justify-center">
+                                    <span class="animate-ping absolute inline-flex h-10 w-10 rounded-full bg-teal-400 opacity-75"><\/span>
+                                    <span class="relative inline-flex rounded-full h-8 w-8 bg-teal-600 border-2 border-white shadow-xl items-center justify-center text-white font-black text-xs">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /><\/svg>
+                                    <\/span>
+                                <\/div>
+                            `,
+                            iconSize: [40, 40],
+                            iconAnchor: [20, 20]
+                        });
+                        const reportMarker = L.marker([this.focusLat, this.focusLng], { icon: pulseIcon }).addTo(this.map);
+                        const safeTitle = this.newReportTitle || 'Aset Baru Dilaporkan';
+                        const safeVillage = this.newReportVillage || 'Kabupaten Gresik';
+                        reportMarker.bindPopup(`
+                            <div class="p-2 text-xs font-sans space-y-1">
+                                <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-teal-100 text-teal-800 font-bold text-[10px]">
+                                    Laporan Baru Warga
+                                <\/div>
+                                <h4 class="font-bold text-slate-900 text-sm">${safeTitle}<\/h4>
+                                <p class="text-slate-500 text-[11px]">${safeVillage}<\/p>
+                            <\/div>
+                        `).openPopup();
+                    }
+
+                    this.map.on('click', () => {
+                        this.activeAsset = null;
+                    });
+                    
+                    if (this.assets && this.assets.length > 0) {
+                        this.activeAsset = this.assets[0];
+                    }
+                },
+
+                renderMarkers() {
+                    if (!this.markersLayer) return;
+                    this.markersLayer.clearLayers();
+
+                    const items = this.assets || [];
+                    items.forEach(asset => {
+                        const customIcon = L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `<div style='background-color: ${asset.color || '#008080'}; width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 800; cursor: pointer;'>${asset.score}<\/div>`,
+                            iconSize: [28, 28],
+                            iconAnchor: [14, 14]
+                        });
+
+                        const marker = L.marker([asset.lat, asset.lng], { icon: customIcon });
+
+                        marker.on('click', (e) => {
+                            if (e && e.originalEvent) {
+                                e.originalEvent.stopPropagation();
+                            }
+                            this.activeAsset = asset;
+                            if (window.innerWidth < 768) {
+                                this.map.panTo([asset.lat, asset.lng]);
+                            }
+                            setTimeout(() => {
+                                if (window.lucide) window.lucide.createIcons();
+                            }, 40);
+                        });
+
+                        this.markersLayer.addLayer(marker);
+                    });
+                }
+            };
+        }
+    </script>
 </div>

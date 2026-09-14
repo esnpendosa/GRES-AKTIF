@@ -76,4 +76,31 @@ class AssetReport extends Model
             default => 'cyan',
         };
     }
+
+    public function getPrimaryPhotoUrlAttribute(): string
+    {
+        if (is_array($this->photos) && count($this->photos) > 0) {
+            $p = $this->photos[0];
+            if (str_starts_with($p, 'http://') || str_starts_with($p, 'https://')) {
+                return $p;
+            }
+            return '/storage/' . ltrim($p, '/');
+        }
+
+        return 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80';
+    }
+
+    public function getFormattedPhotosAttribute(): array
+    {
+        if (!is_array($this->photos) || empty($this->photos)) {
+            return ['https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80'];
+        }
+
+        return array_map(function ($p) {
+            if (str_starts_with($p, 'http://') || str_starts_with($p, 'https://')) {
+                return $p;
+            }
+            return '/storage/' . ltrim($p, '/');
+        }, $this->photos);
+    }
 }

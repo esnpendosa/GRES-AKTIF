@@ -23,6 +23,6 @@ class UserProfile extends Component
         $pointsHistory = $user ? $user->pointsHistory()->latest()->take(10)->get() : collect();
 
         return view('livewire.user-profile', compact('user', 'userBadges', 'allBadges', 'reports', 'ideas', 'pointsHistory'))
-            ->layout('layouts.app', ['title' => 'Profil Kontribusi Warga']);
+            ->layout('layouts.admin', ['title' => 'Pengaturan Profil']);
     }
 }

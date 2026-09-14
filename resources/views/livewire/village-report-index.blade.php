@@ -20,9 +20,9 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
-                    <a href="{{ route('reports.kib_a') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition-colors border border-white/20 backdrop-blur-xs">
-                        <i data-lucide="file-text" class="w-4 h-4 text-amber-300"></i>
-                        <span>Buku Inventaris (KIB A)</span>
+                    <a href="{{ route('reports.sipades') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 font-semibold text-xs transition-colors border border-amber-400/30 backdrop-blur-xs">
+                        <i data-lucide="file-stack" class="w-4 h-4 text-amber-300"></i>
+                        <span>Laporan SIPADES (KIB & LHI)</span>
                     </a>
                     <a href="{{ route('map') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs transition-colors shadow-sm">
                         <i data-lucide="map" class="w-4 h-4"></i>
@@ -146,12 +146,12 @@
                             Rincian Data
                         </button>
                         <a 
-                            href="{{ route('reports.kib_a', $village->id) }}" 
+                            href="{{ route('reports.sipades', ['villageId' => $village->id]) }}" 
                             class="py-1.5 px-2.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-semibold transition-colors flex items-center gap-1"
-                            title="Cetak Format SIPADES (KIB A)"
+                            title="Buka Menu Laporan SIPADES Lengkap"
                         >
-                            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-                            <span>KIB A</span>
+                            <i data-lucide="file-stack" class="w-3.5 h-3.5"></i>
+                            <span>SIPADES</span>
                         </a>
                         <a 
                             href="{{ route('map') }}?village={{ $village->id }}" 
@@ -252,11 +252,11 @@
                             Tutup
                         </button>
                         <a 
-                            href="{{ route('reports.kib_a', $selectedVillageDetail['village']->id) }}" 
+                            href="{{ route('reports.sipades', ['villageId' => $selectedVillageDetail['village']->id]) }}" 
                             class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold flex items-center gap-1.5"
                         >
-                            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-                            <span>Cetak Format SIPADES (KIB A)</span>
+                            <i data-lucide="file-stack" class="w-3.5 h-3.5"></i>
+                            <span>Laporan SIPADES Lengkap</span>
                         </a>
                         <a 
                             href="{{ route('map') }}?village={{ $selectedVillageDetail['village']->id }}" 

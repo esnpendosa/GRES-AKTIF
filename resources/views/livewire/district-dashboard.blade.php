@@ -196,17 +196,17 @@
             <div class="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
                 
                 <div class="p-4 border-b border-slate-100">
-                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-800">UPCOMING INSPECTIONS & DESA AUDITS</h3>
+                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-800">AGENDA INSPEKSI & AUDIT ASET DESA</h3>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-[#80cbc4]/70 text-slate-800 font-extrabold text-[11px] uppercase tracking-wider">
                             <tr>
-                                <th class="py-2.5 px-4 font-extrabold">NAME</th>
-                                <th class="py-2.5 px-4 font-extrabold">LAST INSPECTION</th>
-                                <th class="py-2.5 px-4 font-extrabold">ASSET TYPE</th>
-                                <th class="py-2.5 px-4 font-extrabold">NEXT INSPECTION</th>
+                                <th class="py-2.5 px-4 font-extrabold whitespace-nowrap">NAMA DESA / ASET</th>
+                                <th class="py-2.5 px-4 font-extrabold whitespace-nowrap">INSPEKSI TERAKHIR</th>
+                                <th class="py-2.5 px-4 font-extrabold whitespace-nowrap">JENIS FASILITAS</th>
+                                <th class="py-2.5 px-4 font-extrabold whitespace-nowrap">JADWAL INSPEKSI BERIKUTNYA</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-slate-700">

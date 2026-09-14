@@ -8,20 +8,19 @@
             <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 <h1 class="font-heading font-bold text-2xl text-slate-900">{{ $user->name }}</h1>
                 <span class="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200">
-                    {{ $user->reputation_level }}
+                    {{ $user->role_title ?? 'Warga Aktif' }}
                 </span>
             </div>
-            <p class="text-xs text-slate-500">{{ $user->role_title }} &bull; Desa Sukomulyo, Kecamatan Manyar, Gresik</p>
+            <p class="text-xs text-slate-500">Desa Sukomulyo, Kecamatan Manyar, Gresik</p>
 
-            <div class="pt-2 flex items-center justify-center sm:justify-start gap-5 text-xs text-slate-600">
-                <div>
-                    <span class="font-extrabold text-teal-700 text-base">{{ $user->points }}</span> <span class="text-slate-500">pts total</span>
+            <div class="pt-2 flex items-center justify-center sm:justify-start gap-6 text-xs text-slate-600">
+                <div class="flex items-center gap-1.5">
+                    <span class="font-extrabold text-slate-900 text-lg">{{ $reports->count() }}</span>
+                    <span class="text-slate-500">laporan aset</span>
                 </div>
-                <div>
-                    <span class="font-extrabold text-slate-900 text-base">{{ $reports->count() }}</span> <span class="text-slate-500">laporan</span>
-                </div>
-                <div>
-                    <span class="font-extrabold text-slate-900 text-base">{{ $ideas->count() }}</span> <span class="text-slate-500">ide gagasan</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="font-extrabold text-slate-900 text-lg">{{ $ideas->count() }}</span>
+                    <span class="text-slate-500">ide gagasan</span>
                 </div>
             </div>
         </div>
@@ -32,38 +31,15 @@
         </a>
     </div>
 
-    <!-- Gamification Badges Section -->
-    <div class="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-xs space-y-4">
-        <div>
-            <h3 class="font-heading font-bold text-base text-slate-900">Lencana Kontribusi Warga (Badges)</h3>
-            <p class="text-xs text-slate-500">Penghargaan atas partisipasi aktif dalam pemetaan dan gagasan re-aktivasi aset daerah.</p>
-        </div>
-
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1">
-            @foreach($allBadges as $badge)
-                @php
-                    $isUnlocked = $userBadges->contains('id', $badge->id);
-                @endphp
-                <div class="p-4 rounded-xl border text-center space-y-2 {{ $isUnlocked ? 'border-teal-300 bg-teal-50/50' : 'border-slate-200 bg-slate-50/50 opacity-60' }}">
-                    <div class="w-12 h-12 rounded-xl mx-auto flex items-center justify-center text-lg {{ $isUnlocked ? 'bg-teal-700 text-white' : 'bg-slate-200 text-slate-500' }}">
-                        <i data-lucide="{{ $badge->icon ?? 'award' }}" class="w-5 h-5"></i>
-                    </div>
-                    <h4 class="font-bold text-xs text-slate-900">{{ $badge->name }}</h4>
-                    <p class="text-[10px] text-slate-500 leading-snug">{{ $badge->description }}</p>
-                    <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded {{ $isUnlocked ? 'bg-teal-100 text-teal-800' : 'bg-slate-200 text-slate-600' }}">
-                        {{ $isUnlocked ? 'Aktif' : 'Terkunci (' . $badge->min_points . ' pts)' }}
-                    </span>
-                </div>
-            @endforeach
-        </div>
-    </div>
-
-    <!-- Contribution History Tabs -->
+    <!-- User Activities Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         <!-- My Asset Reports -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
-            <h3 class="font-heading font-bold text-base text-slate-900">Riwayat Laporan Saya ({{ $reports->count() }})</h3>
+            <div class="flex items-center justify-between">
+                <h3 class="font-heading font-bold text-base text-slate-900">Riwayat Laporan Saya ({{ $reports->count() }})</h3>
+                <a href="{{ route('reports.create') }}" class="text-xs text-teal-700 font-bold hover:underline">+ Lapor</a>
+            </div>
             <div class="space-y-3">
                 @forelse($reports as $rep)
                     <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5 text-xs">
@@ -76,25 +52,34 @@
                         <p class="text-slate-500 text-[11px] line-clamp-1">{{ $rep->address ?? 'Manyar, Gresik' }} &bull; Usulan: {{ $rep->suggested_use }}</p>
                     </div>
                 @empty
-                    <p class="text-xs text-slate-400 text-center py-4">Belum ada laporan aset yang dikirim.</p>
+                    <p class="text-xs text-slate-400 text-center py-6">Belum ada laporan aset yang dikirim.</p>
                 @endforelse
             </div>
         </div>
 
-        <!-- Points History Log -->
+        <!-- My Proposed Ideas -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
-            <h3 class="font-heading font-bold text-base text-slate-900">Aktivitas Poin Kontribusi</h3>
-            <div class="space-y-2.5">
-                @forelse($pointsHistory as $ph)
-                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
-                        <div>
-                            <p class="font-semibold text-slate-800">{{ $ph->reason }}</p>
-                            <span class="text-[10px] text-slate-400">{{ $ph->created_at->diffForHumans() }}</span>
+            <div class="flex items-center justify-between">
+                <h3 class="font-heading font-bold text-base text-slate-900">Usulan Gagasan Pemanfaatan ({{ $ideas->count() }})</h3>
+                <a href="{{ route('map') }}" class="text-xs text-teal-700 font-bold hover:underline">Peta Aset</a>
+            </div>
+            <div class="space-y-3">
+                @forelse($ideas as $idea)
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5 text-xs">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="font-bold text-slate-900 line-clamp-1">{{ $idea->title }}</span>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-100 text-teal-800 shrink-0">
+                                {{ $idea->category }}
+                            </span>
                         </div>
-                        <span class="font-extrabold text-teal-700 bg-teal-50 px-2.5 py-0.5 rounded-md border border-teal-100">+{{ $ph->points }} pts</span>
+                        <p class="text-slate-600 text-[11px] line-clamp-2 leading-relaxed">{{ $idea->description }}</p>
+                        <div class="flex items-center justify-between pt-1 text-[10px] text-slate-400">
+                            <span>Aset: {{ $idea->asset ? $idea->asset->name : 'Umum' }}</span>
+                            <span>{{ $idea->votes_count ?? 0 }} Dukungan</span>
+                        </div>
                     </div>
                 @empty
-                    <p class="text-xs text-slate-400 text-center py-4">Belum ada riwayat poin.</p>
+                    <p class="text-xs text-slate-400 text-center py-6">Belum ada usulan gagasan pemanfaatan.</p>
                 @endforelse
             </div>
         </div>

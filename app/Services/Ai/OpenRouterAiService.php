@@ -161,4 +161,178 @@ SYS;
             "3. Proyeksi Kinerja:\n" .
             "Diharapkan mampu menyerap 15-25 tenaga kerja lokal serta menghasilkan nilai perputaran ekonomi baru di tingkat desa.";
     }
+
+    /**
+     * Parse natural language report from user into structured AssetReport attributes
+     */
+    public function parseAssetReportFromText(string $userText): array
+    {
+        $categories = \App\Models\AssetCategory::all();
+        $villages = \App\Models\Village::with('district')->get();
+        
+        $categoryList = $categories->pluck('name')->implode(', ');
+        $villageList = $villages->pluck('name')->implode(', ');
+
+        $systemPrompt = <<<SYS
+Anda adalah parser AI cerdas untuk sistem KENTONGAN AI Kabupaten Gresik.
+Tugas Anda: mengekstrak informasi aset daerah yang ingin dilaporkan warga dari teks menjadi format JSON murni tanpa markdown codeblock atau teks lain.
+
+Kategori yang valid: {$categoryList}
+Pilihan kondisi yang valid: tidak_digunakan, jarang_digunakan, kurang_produktif, rusak, terbengkalai
+Pilihan rekomendasi pemanfaatan (suggested_use): UMKM, Kuliner, Pertanian, Wisata, Pendidikan, Olahraga, Coworking, Lainnya
+Daftar desa di Gresik: {$villageList}
+
+Format output JSON:
+{
+  "title": "Nama/Judul Aset Singkat Jelas",
+  "village_name": "Nama Desa",
+  "category_name": "Kategori yang paling cocok",
+  "condition": "kondisi yang valid",
+  "suggested_use": "usulan yang valid",
+  "address": "Perkiraan alamat atau patokan lokasi",
+  "description": "Deskripsi rinci mengenai kondisi dan potensi aset"
+}
+SYS;
+
+        if (!empty($this->apiKey)) {
+            try {
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'HTTP-Referer' => config('app.url', 'http://localhost:8000'),
+                    'X-Title' => 'KENTONGAN AI Report Parser',
+                    'Content-Type' => 'application/json',
+                ])->timeout(15)->post($this->baseUrl . '/chat/completions', [
+                    'model' => $this->model,
+                    'messages' => [
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user', 'content' => $userText]
+                    ],
+                    'temperature' => 0.2,
+                    'max_tokens' => 500,
+                ]);
+
+                if ($response->successful()) {
+                    $content = $response->json('choices.0.message.content');
+                    $cleanJson = preg_replace('/^```(?:json)?\s*|\s*```$/i', '', trim($content));
+                    $data = json_decode($cleanJson, true);
+                    if (is_array($data) && !empty($data['title'])) {
+                        return $this->resolveExtractedReport($data, $userText, $villages, $categories);
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::warning("OpenRouter parseAssetReportFromText failed: " . $e->getMessage());
+            }
+        }
+
+        return $this->fallbackParseAssetReport($userText, $villages, $categories);
+    }
+
+    protected function resolveExtractedReport(array $data, string $rawText, $villages, $categories): array
+    {
+        $villageName = $data['village_name'] ?? '';
+        $matchedVillage = $villages->first(fn($v) => stripos($v->name, $villageName) !== false) 
+            ?? $villages->first();
+
+        $categoryName = $data['category_name'] ?? '';
+        $matchedCategory = $categories->first(fn($c) => stripos($c->name, $categoryName) !== false)
+            ?? $categories->first();
+
+        $condition = in_array($data['condition'] ?? '', ['tidak_digunakan', 'jarang_digunakan', 'kurang_produktif', 'rusak', 'terbengkalai'])
+            ? $data['condition']
+            : 'terbengkalai';
+
+        $suggestedUse = in_array($data['suggested_use'] ?? '', ['UMKM', 'Kuliner', 'Pertanian', 'Wisata', 'Pendidikan', 'Olahraga', 'Coworking', 'Lainnya'])
+            ? $data['suggested_use']
+            : 'UMKM';
+
+        return [
+            'title' => $data['title'] ?? 'Laporan Aset Desa Terbengkalai',
+            'village_id' => $matchedVillage?->id,
+            'village_name' => $matchedVillage?->name ?? 'Sukomulyo',
+            'district_id' => $matchedVillage?->district_id,
+            'district_name' => $matchedVillage?->district?->name ?? 'Manyar',
+            'category_id' => $matchedCategory?->id,
+            'category_name' => $matchedCategory?->name ?? 'Tanah Kas Desa & Pekarangan',
+            'condition' => $condition,
+            'suggested_use' => $suggestedUse,
+            'latitude' => (float)($matchedVillage?->latitude ?? -7.1350),
+            'longitude' => (float)($matchedVillage?->longitude ?? 112.6020),
+            'address' => $data['address'] ?? ($matchedVillage ? "Desa {$matchedVillage->name}, Manyar, Gresik" : 'Gresik, Jawa Timur'),
+            'description' => $data['description'] ?? $rawText,
+        ];
+    }
+
+    protected function fallbackParseAssetReport(string $rawText, $villages, $categories): array
+    {
+        $lower = strtolower($rawText);
+
+        // Find village
+        $matchedVillage = null;
+        foreach ($villages as $v) {
+            if (str_contains($lower, strtolower($v->name))) {
+                $matchedVillage = $v;
+                break;
+            }
+        }
+        $matchedVillage = $matchedVillage ?? $villages->first();
+
+        // Find category
+        $matchedCategory = null;
+        if (str_contains($lower, 'gedung') || str_contains($lower, 'bangunan') || str_contains($lower, 'balai') || str_contains($lower, 'gudang') || str_contains($lower, 'ruko') || str_contains($lower, 'kantor')) {
+            $matchedCategory = $categories->first(fn($c) => str_contains(strtolower($c->name), 'bangunan'));
+        } elseif (str_contains($lower, 'pasar') || str_contains($lower, 'kios') || str_contains($lower, 'lapak')) {
+            $matchedCategory = $categories->first(fn($c) => str_contains(strtolower($c->name), 'pasar'));
+        } elseif (str_contains($lower, 'lapangan') || str_contains($lower, 'olahraga') || str_contains($lower, 'gor')) {
+            $matchedCategory = $categories->first(fn($c) => str_contains(strtolower($c->name), 'olahraga'));
+        } elseif (str_contains($lower, 'tambak') || str_contains($lower, 'sawah') || str_contains($lower, 'tani') || str_contains($lower, 'kebun')) {
+            $matchedCategory = $categories->first(fn($c) => str_contains(strtolower($c->name), 'pertanian'));
+        } elseif (str_contains($lower, 'wisata') || str_contains($lower, 'pantai') || str_contains($lower, 'taman')) {
+            $matchedCategory = $categories->first(fn($c) => str_contains(strtolower($c->name), 'wisata'));
+        }
+        $matchedCategory = $matchedCategory ?? $categories->first(fn($c) => str_contains(strtolower($c->name), 'tanah')) ?? $categories->first();
+
+        // Find condition
+        $condition = 'terbengkalai';
+        if (str_contains($lower, 'rusak')) {
+            $condition = 'rusak';
+        } elseif (str_contains($lower, 'jarang')) {
+            $condition = 'jarang_digunakan';
+        } elseif (str_contains($lower, 'kurang') || str_contains($lower, 'sepi')) {
+            $condition = 'kurang_produktif';
+        } elseif (str_contains($lower, 'kosong') || str_contains($lower, 'tidak dipakai') || str_contains($lower, 'tidak digunakan')) {
+            $condition = 'tidak_digunakan';
+        }
+
+        // Find suggested use
+        $suggestedUse = 'UMKM';
+        if (str_contains($lower, 'kuliner') || str_contains($lower, 'makan') || str_contains($lower, 'pujasera') || str_contains($lower, 'kafe')) {
+            $suggestedUse = 'Kuliner';
+        } elseif (str_contains($lower, 'wisata') || str_contains($lower, 'rekreasi') || str_contains($lower, 'taman')) {
+            $suggestedUse = 'Wisata';
+        } elseif (str_contains($lower, 'tani') || str_contains($lower, 'hidroponik') || str_contains($lower, 'tambak')) {
+            $suggestedUse = 'Pertanian';
+        } elseif (str_contains($lower, 'olahraga') || str_contains($lower, 'lapangan')) {
+            $suggestedUse = 'Olahraga';
+        } elseif (str_contains($lower, 'vokasi') || str_contains($lower, 'kursus') || str_contains($lower, 'belajar')) {
+            $suggestedUse = 'Pendidikan';
+        }
+
+        $title = "Laporan {$matchedCategory->name} di Desa {$matchedVillage->name}";
+
+        return [
+            'title' => $title,
+            'village_id' => $matchedVillage->id,
+            'village_name' => $matchedVillage->name,
+            'district_id' => $matchedVillage->district_id,
+            'district_name' => $matchedVillage->district?->name ?? 'Manyar',
+            'category_id' => $matchedCategory->id,
+            'category_name' => $matchedCategory->name,
+            'condition' => $condition,
+            'suggested_use' => $suggestedUse,
+            'latitude' => (float)$matchedVillage->latitude,
+            'longitude' => (float)$matchedVillage->longitude,
+            'address' => "Area Desa {$matchedVillage->name}, Kecamatan Manyar, Kabupaten Gresik",
+            'description' => $rawText,
+        ];
+    }
 }

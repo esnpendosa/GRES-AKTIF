@@ -13,6 +13,10 @@ class Village extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'boundary' => 'array',
+    ];
+
     public function district(): BelongsTo
     {
         return $this->belongsTo(District::class);
@@ -31,5 +35,28 @@ class Village extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    /**
+     * Kembalikan boundary polygon desa.
+     * Jika boundary belum diset, buat kotak otomatis ±0.008° dari pusat desa.
+     */
+    public function getBoundaryCoords(): array
+    {
+        if (!empty($this->boundary)) {
+            return $this->boundary;
+        }
+
+        // Fallback: buat kotak kasar dari koordinat pusat desa (±~900m)
+        $lat = (float) ($this->latitude ?? -7.1350);
+        $lng = (float) ($this->longitude ?? 112.6020);
+        $delta = 0.008;
+
+        return [
+            [$lat - $delta, $lng - $delta],
+            [$lat - $delta, $lng + $delta],
+            [$lat + $delta, $lng + $delta],
+            [$lat + $delta, $lng - $delta],
+        ];
     }
 }

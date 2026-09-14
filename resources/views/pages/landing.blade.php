@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
 <div class="bg-[#f8fafc] min-h-screen py-6 sm:py-8">

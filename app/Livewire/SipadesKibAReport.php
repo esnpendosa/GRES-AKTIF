@@ -9,7 +9,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.admin')]
 #[Title('Buku Inventaris Aset Desa Tanah (KIB A) - SIPADES R3')]
 class SipadesKibAReport extends Component
 {
